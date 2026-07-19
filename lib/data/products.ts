@@ -162,14 +162,14 @@ export const products: Product[] = [
     ],
     downloads: [
       {
-        title: "Brosur Retort-Sterilizer.pdf",
-        subtitle: "Download Brochure",
-        href: "#",
+        title: "Brosur Retort Sterilizer",
+        subtitle: "Spesifikasi teknis & fitur produk",
+        href: "/assets/downloads/brosur-retort-sterilizer.pdf",
       },
       {
-        title: "SOP-Operasional-Retort.pdf",
-        subtitle: "Technical Manual",
-        href: "#",
+        title: "SOP Operasional Retort",
+        subtitle: "Panduan operasi & prosedur keselamatan",
+        href: "/assets/downloads/sop-operasional-retort.pdf",
       },
     ],
     benefit: {
@@ -248,6 +248,26 @@ export function getHomeProducts(): Product[] {
     products[1],
     products[2],
   ].filter(Boolean) as Product[];
+}
+
+export function getBestSellerProduct(): Product | undefined {
+  return (
+    products.find((product) => product.slug === "industrial-retort-sterilizer") ??
+    products[0]
+  );
+}
+
+export function getLatestCollectionProducts(): Product[] {
+  const slugs = [
+    "automatic-vacuum-packaging-machine",
+    "automatic-liquid-filling-machine-beverages",
+    "14-head-multihead-weigher",
+    "industrial-food-dehydrator",
+  ];
+
+  return slugs
+    .map((slug) => products.find((product) => product.slug === slug))
+    .filter(Boolean) as Product[];
 }
 
 export function getFoodProcessingProducts(): Product[] {

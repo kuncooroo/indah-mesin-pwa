@@ -1,11 +1,9 @@
-import { AppHeader } from "@/components/layout/app-header";
-import { SavedItemsSection } from "@/components/sections/saved/saved-items-section";
+import { FavoritesSection } from "@/components/sections/favorites/favorites-section";
 
-export default function SavedPage() {
+export default function FavoritesPage() {
   return (
     <div className="page-rise">
-      <AppHeader variant="back" backHref="/" title="IndustrialX" />
-      <SavedItemsSection />
+      <FavoritesSection />
     </div>
   );
 }

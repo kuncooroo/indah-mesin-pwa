@@ -10,13 +10,12 @@ import {
   MessageCircle,
   Search,
   UserCircle,
-  ArrowLeft,
 } from "lucide-react";
 
+import { BackLink } from "@/components/shared/back-link";
 import { cn } from "@/lib/utils";
 
-type AppHeaderProps = {
-  variant?: "default" | "back" | "minimal";
+type AppHeaderProps = {  variant?: "default" | "back" | "minimal";
   title?: string;
   backHref?: string;
   showSearch?: boolean;
@@ -46,13 +45,7 @@ export function AppHeader({
     >
       <div className="flex items-center gap-4">
         {variant === "back" && backHref ? (
-          <Link
-            href={backHref}
-            aria-label="Kembali"
-            className="rounded-full p-2 text-primary transition-colors hover:bg-surface-container"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Link>
+          <BackLink href={backHref} />
         ) : showMenu ? (
           <button
             type="button"
@@ -99,9 +92,9 @@ export function AppHeader({
 
 export const desktopNavLinks = [
   { label: "Home", href: "/" },
-  { label: "Categories", href: "/kategori" },
+  { label: "Produk", href: "/produk" },
   { label: "Saved", href: "/simpanan" },
-  { label: "Contact", href: "/kontak" },
+  { label: "Akun", href: "/akun" },
 ];
 
 export function DesktopNav({ activePath }: { activePath: string }) {

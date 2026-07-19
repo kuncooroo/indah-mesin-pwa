@@ -5,31 +5,31 @@ export const homeCategories: Category[] = [
     slug: "sterilisasi",
     label: "Mesin Sterilisasi",
     icon: "Sparkles",
-    href: "/kategori/sterilisasi",
+    href: "/produk?kategori=sterilisasi",
   },
   {
     slug: "penutup-kaleng",
     label: "Mesin Penutup Kaleng",
     icon: "Box",
-    href: "/kategori/penutup-kaleng",
+    href: "/produk?kategori=penutup-kaleng",
   },
   {
     slug: "seal-kemasan",
     label: "Mesin Seal Kemasan",
     icon: "Package",
-    href: "/kategori/seal-kemasan",
+    href: "/produk?kategori=seal-kemasan",
   },
   {
     slug: "konveyor",
     label: "Mesin Konveyor",
     icon: "ArrowRightLeft",
-    href: "/kategori/konveyor",
+    href: "/produk?kategori=konveyor",
   },
   {
     slug: "produksi",
     label: "Mesin Produksi",
     icon: "Factory",
-    href: "/kategori/produksi",
+    href: "/produk?kategori=produksi",
   },
 ];
 

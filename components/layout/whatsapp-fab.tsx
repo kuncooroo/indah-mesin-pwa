@@ -21,7 +21,7 @@ export function WhatsAppFab({ className, hidden }: WhatsAppFabProps) {
       rel="noreferrer"
       aria-label="Hubungi via WhatsApp"
       className={cn(
-        "fixed right-6 bottom-20 z-[60] flex items-center justify-center rounded-full bg-whatsapp p-4 text-white shadow-2xl transition-transform cta-wa-pulse hover:scale-110 active:scale-90",
+        "fixed right-6 bottom-[88px] z-[60] flex items-center justify-center rounded-full bg-whatsapp p-4 text-white shadow-2xl transition-transform cta-wa-pulse hover:scale-110 active:scale-90",
         className,
       )}
     >

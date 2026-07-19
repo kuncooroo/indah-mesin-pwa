@@ -11,7 +11,7 @@ type AppShellProps = {
 };
 
 function shouldHideWhatsAppFab(pathname: string): boolean {
-  return pathname.startsWith("/produk/") || pathname.startsWith("/kategori");
+  return pathname.startsWith("/produk/") && pathname !== "/produk";
 }
 
 export function AppShell({ children }: AppShellProps) {
@@ -21,7 +21,7 @@ export function AppShell({ children }: AppShellProps) {
   return (
     <div className="app-background">
       <div className="mobile-app-shell">
-        <div className="min-h-screen bg-surface pb-20">{children}</div>
+        <div className="bg-surface pb-[76px]">{children}</div>
         <BottomNavigation />
         <WhatsAppFab hidden={!showWhatsAppFab} />
       </div>

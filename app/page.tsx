@@ -1,25 +1,25 @@
-import { AppHeader } from "@/components/layout/app-header";
-import { PwaInstallBanner } from "@/components/layout/pwa-install-banner";
 import { CategoriesSection } from "@/components/sections/home/categories-section";
-import { FeaturedProductsSection } from "@/components/sections/home/featured-products-section";
-import { HeroSection } from "@/components/sections/home/hero-section";
-import { QuickFiltersSection } from "@/components/sections/home/quick-filters-section";
-import { RfqSection } from "@/components/sections/home/rfq-section";
-import { getHomeProducts } from "@/lib/data/products";
+import { BestSellerSection } from "@/components/sections/home/best-seller-section";
+import { HomeHeader } from "@/components/sections/home/home-header";
+import { LatestCollectionSection } from "@/components/sections/home/latest-collection-section";
+import { PromoHeroSection } from "@/components/sections/home/promo-hero-section";
+import {
+  getBestSellerProduct,
+  getLatestCollectionProducts,
+} from "@/lib/data/products";
 
 export default function HomePage() {
-  const products = getHomeProducts();
+  const bestSeller = getBestSellerProduct();
+  const latestProducts = getLatestCollectionProducts();
 
   return (
     <div className="page-rise">
-      <PwaInstallBanner />
-      <AppHeader showAccount />
-      <main className="mx-auto max-w-7xl">
-        <HeroSection />
+      <HomeHeader />
+      <main>
+        <PromoHeroSection />
         <CategoriesSection />
-        <QuickFiltersSection />
-        <FeaturedProductsSection products={products} />
-        <RfqSection />
+        {bestSeller ? <BestSellerSection product={bestSeller} /> : null}
+        <LatestCollectionSection products={latestProducts} />
       </main>
     </div>
   );

@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "lh3.googleusercontent.com",
       },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
     ],
   },
   async headers() {
@@ -28,14 +32,15 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
-      { source: "/produk", destination: "/kategori", permanent: true },
+      { source: "/kategori", destination: "/produk", permanent: true },
       {
-        source: "/produk/kategori/:slug",
-        destination: "/kategori/:slug",
-        permanent: true,
+        source: "/kategori/:slug",
+        destination: "/produk?kategori=:slug",
+        permanent: false,
       },
-      { source: "/berita", destination: "/", permanent: true },
-      { source: "/katalog", destination: "/kategori", permanent: true },
+      { source: "/katalog", destination: "/produk", permanent: true },
+      { source: "/favorit", destination: "/simpanan", permanent: true },
+      { source: "/kontak", destination: "/akun", permanent: true },
     ];
   },
 };
