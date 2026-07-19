@@ -1,13 +1,75 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../lib/generated/prisma"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
+}
+
+enum UserRole {
+  SUPERADMIN
+  ADMIN
+}
+
+enum StockStatus {
+  READY
+  INDENT
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      UserRole @default(ADMIN)
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  label       String
+  icon        String?
+  description String?   @db.Text
+  sortOrder   Int       @default(0) @map("sort_order")
+  isActive    Boolean   @default(true) @map("is_active")
+  products    Product[]
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@map("categories")
+}
+
+model Product {
+  id             String      @id @default(cuid())
+  slug           String      @unique
+  sku            String      @unique
+  name           String
+  description    String      @db.Text
+  image          String      @db.Text
+  gallery        Json?
+  categoryId     String      @map("category_id")
+  category       Category    @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  status         StockStatus @default(READY)
+  statusLabel    String      @map("status_label")
+  priceLabel     String      @map("price_label")
+  priceNote      String?     @map("price_note") @db.Text
+  features       Json?
+  specifications Json?
+  downloads      Json?
+  benefit        Json?
+  isFeatured     Boolean     @default(false) @map("is_featured")
+  isActive       Boolean     @default(true) @map("is_active")
+  sortOrder      Int         @default(0) @map("sort_order")
+  createdAt      DateTime    @default(now()) @map("created_at")
+  updatedAt      DateTime    @updatedAt @map("updated_at")
+
+  @@index([categoryId])
+  @@index([isActive, isFeatured])
+  @@map("products")
 }
