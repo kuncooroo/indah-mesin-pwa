@@ -5,6 +5,10 @@ export type FavoriteItem = {
   description: string;
   priceLabel: string;
   image: string;
+  quantity: number;
+  note: string;
+  statusLabel: string;
+  categoryLabel: string;
 };
 
 const retortImage =
@@ -25,6 +29,10 @@ export const favoriteItems: FavoriteItem[] = [
       "Sistem sterilisasi tekanan tinggi untuk industri makanan menengah. Kapasitas 1200L dengan kontrol PLC.",
     priceLabel: "Rp 650.000.000",
     image: retortImage,
+    quantity: 1,
+    note: "Steam Retort",
+    statusLabel: "Ready Stock",
+    categoryLabel: "Mesin Industri",
   },
   {
     id: "fav-cpr-2000",
@@ -34,6 +42,10 @@ export const favoriteItems: FavoriteItem[] = [
       "Panel kontrol retort dengan interface touch screen Siemens. Mendukung profil sterilisasi otomatis.",
     priceLabel: "Rp 85.000.000",
     image: panelImage,
+    quantity: 2,
+    note: "",
+    statusLabel: "Ready Stock",
+    categoryLabel: "Panel Kontrol",
   },
   {
     id: "fav-psap-304",
@@ -43,5 +55,9 @@ export const favoriteItems: FavoriteItem[] = [
       "Pompa sirkulasi air panas stainless steel untuk sistem retort. Head 30m, flow rate 304 L/min.",
     priceLabel: "Rp 45.750.000",
     image: pumpImage,
+    quantity: 1,
+    note: "",
+    statusLabel: "Indent 4 Minggu",
+    categoryLabel: "Sparepart",
   },
 ];

@@ -157,12 +157,22 @@ export function NewsSection() {
           </section>
         ) : null}
 
-        <section>
+        <section id="daftar-artikel">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-[15px] font-bold text-primary">Artikel Terbaru</h2>
-            <Link href="/berita" className="text-[12px] font-semibold text-primary">
+            <h2 className="text-[15px] font-bold text-primary">Artikel Berguna</h2>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveCategory("all");
+                setSearchQuery("");
+                document
+                  .getElementById("daftar-artikel")
+                  ?.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+              className="text-[12px] font-semibold text-primary"
+            >
               Lihat Semua &gt;
-            </Link>
+            </button>
           </div>
 
           <div className="space-y-3">

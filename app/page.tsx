@@ -3,6 +3,7 @@ import { BestSellerSection } from "@/components/sections/home/best-seller-sectio
 import { HomeHeader } from "@/components/sections/home/home-header";
 import { LatestCollectionSection } from "@/components/sections/home/latest-collection-section";
 import { PromoHeroSection } from "@/components/sections/home/promo-hero-section";
+import { UsefulArticlesSection } from "@/components/sections/home/useful-articles-section";
 import {
   getBestSellerProduct,
   getLatestCollectionProducts,
@@ -20,6 +21,7 @@ export default function HomePage() {
         <CategoriesSection />
         {bestSeller ? <BestSellerSection product={bestSeller} /> : null}
         <LatestCollectionSection products={latestProducts} />
+        <UsefulArticlesSection />
       </main>
     </div>
   );

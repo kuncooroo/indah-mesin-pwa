@@ -1,14 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
+  Camera,
   ChevronDown,
   CircleHelp,
   Mail,
   Phone,
   Search,
   SlidersHorizontal,
+  User,
+  X,
 } from "lucide-react";
 
 import { BackLink } from "@/components/shared/back-link";
@@ -28,6 +31,7 @@ export function HelpFaqSection() {
   const [activeCategory, setActiveCategory] = useState<FaqCategory>("umum");
   const [searchQuery, setSearchQuery] = useState("");
   const [openFaqId, setOpenFaqId] = useState<string>("faq-order");
+  const [showCategoryFilter, setShowCategoryFilter] = useState(false);
 
   const filteredFaqs = useMemo(() => {
     let list = faqItems.filter((item) => item.category === activeCategory);
@@ -44,8 +48,28 @@ export function HelpFaqSection() {
     return list;
   }, [activeCategory, searchQuery]);
 
+  const activeCategoryLabel =
+    faqCategories.find((category) => category.id === activeCategory)?.label ??
+    "Umum";
+
+  useEffect(() => {
+    if (!showCategoryFilter) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [showCategoryFilter]);
+
   function toggleFaq(id: string) {
     setOpenFaqId((current) => (current === id ? "" : id));
+  }
+
+  function handleSelectCategory(category: FaqCategory) {
+    setActiveCategory(category);
+    setShowCategoryFilter(false);
   }
 
   return (
@@ -98,24 +122,6 @@ export function HelpFaqSection() {
 
         {activeTab === "faq" ? (
           <>
-            <div className="no-scrollbar -mx-4 mb-4 flex gap-2 overflow-x-auto px-4">
-              {faqCategories.map((category) => (
-                <button
-                  key={category.id}
-                  type="button"
-                  onClick={() => setActiveCategory(category.id)}
-                  className={cn(
-                    "shrink-0 rounded-full px-4 py-2 text-[12px] font-semibold transition-colors",
-                    activeCategory === category.id
-                      ? "bg-primary text-white"
-                      : "border border-[#bfdbfe] bg-white text-primary",
-                  )}
-                >
-                  {category.label}
-                </button>
-              ))}
-            </div>
-
             <div className="mb-4 flex gap-2">
               <div className="relative flex-1">
                 <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-on-surface-variant" />
@@ -129,12 +135,19 @@ export function HelpFaqSection() {
               </div>
               <button
                 type="button"
-                aria-label="Filter pertanyaan"
+                aria-label="Filter kategori FAQ"
+                aria-expanded={showCategoryFilter}
+                onClick={() => setShowCategoryFilter(true)}
                 className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-[#bfdbfe] bg-[#eff6ff] text-primary"
               >
                 <SlidersHorizontal className="size-4" strokeWidth={2.2} />
               </button>
             </div>
+
+            <p className="mb-4 text-[12px] text-on-surface-variant">
+              Kategori:{" "}
+              <span className="font-semibold text-primary">{activeCategoryLabel}</span>
+            </p>
 
             <div className="space-y-3">
               {filteredFaqs.map((item) => {
@@ -241,6 +254,44 @@ export function HelpFaqSection() {
           </div>
         )}
       </main>
+
+      {showCategoryFilter ? (
+        <div className="fixed inset-0 z-[60] mx-auto flex w-full max-w-[480px] items-end bg-black/40">
+          <div className="w-full rounded-t-3xl bg-white px-4 pt-4 pb-8">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-[16px] font-bold text-primary">Filter Kategori</h2>
+              <button
+                type="button"
+                aria-label="Tutup filter"
+                onClick={() => setShowCategoryFilter(false)}
+                className="flex size-9 items-center justify-center rounded-full bg-[#f1f5f9] text-primary"
+              >
+                <X className="size-4" strokeWidth={2.2} />
+              </button>
+            </div>
+            <div className="space-y-2">
+              {faqCategories.map((category) => (
+                <button
+                  key={category.id}
+                  type="button"
+                  onClick={() => handleSelectCategory(category.id)}
+                  className={cn(
+                    "flex w-full items-center justify-between rounded-2xl px-4 py-3 text-left text-[13px] font-semibold transition-colors",
+                    activeCategory === category.id
+                      ? "bg-primary text-white"
+                      : "bg-[#f8fafc] text-primary hover:bg-[#eff6ff]",
+                  )}
+                >
+                  {category.label}
+                  {activeCategory === category.id ? (
+                    <span className="text-[11px] font-medium opacity-90">Aktif</span>
+                  ) : null}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

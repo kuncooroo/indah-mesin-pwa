@@ -1,12 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import {
-  Bell,
   CircleHelp,
-  ClipboardList,
-  CreditCard,
-  Heart,
   LogOut,
   ShieldCheck,
   Settings,
@@ -15,12 +12,9 @@ import {
 } from "lucide-react";
 
 import { BackLink } from "@/components/shared/back-link";
-import {
-  profileMenuItems,
-  profileQuickActions,
-  profileUser,
-} from "@/lib/data/profile";
+import { profileMenuItems, profileUser } from "@/lib/data/profile";
 import type { ProfileMenuItem } from "@/lib/data/profile";
+import { getProfileData } from "@/lib/profile-store";
 
 function MenuIcon({ icon }: { icon: ProfileMenuItem["icon"] }) {
   const className = "size-5";
@@ -28,10 +22,6 @@ function MenuIcon({ icon }: { icon: ProfileMenuItem["icon"] }) {
   switch (icon) {
     case "shield":
       return <ShieldCheck className={className} strokeWidth={2} />;
-    case "credit-card":
-      return <CreditCard className={className} strokeWidth={2} />;
-    case "bell":
-      return <Bell className={className} strokeWidth={2} />;
     case "settings":
       return <Settings className={className} strokeWidth={2} />;
     case "help":
@@ -41,17 +31,13 @@ function MenuIcon({ icon }: { icon: ProfileMenuItem["icon"] }) {
   }
 }
 
-function QuickActionIcon({ icon }: { icon: "user" | "heart" | "orders" }) {
-  const className = "size-6";
-
-  if (icon === "heart") return <Heart className={className} strokeWidth={2} />;
-  if (icon === "orders") {
-    return <ClipboardList className={className} strokeWidth={2} />;
-  }
-  return <User className={className} strokeWidth={2} />;
-}
-
 export function ProfileSection() {
+  const [user, setUser] = useState(profileUser);
+
+  useEffect(() => {
+    setUser(getProfileData());
+  }, []);
+
   function handleMenuClick(item: ProfileMenuItem) {
     if (item.action === "logout") {
       if (confirm("Apakah Anda yakin ingin keluar?")) {
@@ -66,13 +52,13 @@ export function ProfileSection() {
         <div className="flex items-center justify-between">
           <BackLink />
           <h1 className="text-[18px] font-bold text-primary">Profil Saya</h1>
-          <button
-            type="button"
+          <Link
+            href="/akun/edit"
             aria-label="Edit profil"
             className="flex size-10 items-center justify-center rounded-full bg-[#eff6ff] text-primary"
           >
             <SquarePen className="size-[18px]" strokeWidth={2} />
-          </button>
+          </Link>
         </div>
       </header>
 
@@ -81,27 +67,8 @@ export function ProfileSection() {
           <div className="flex size-[120px] items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-[#94a3b8] to-[#64748b] ring-[5px] ring-[#eff6ff]">
             <User className="size-14 text-white/90" strokeWidth={1.8} />
           </div>
-          <h2 className="mt-5 text-[22px] font-bold text-primary">
-            {profileUser.name}
-          </h2>
-          <p className="mt-1.5 text-[14px] text-on-surface-variant">
-            ID: {profileUser.id}
-          </p>
-        </section>
-
-        <section className="mb-8 overflow-hidden rounded-2xl bg-[#eef4ff]">
-          <div className="grid grid-cols-3 divide-x divide-[#dbeafe]">
-            {profileQuickActions.map((action) => (
-              <Link
-                key={action.id}
-                href={action.href}
-                className="flex flex-col items-center gap-2.5 py-5 text-primary transition-colors hover:bg-[#dbeafe]/40"
-              >
-                <QuickActionIcon icon={action.icon} />
-                <span className="text-[13px] font-semibold">{action.label}</span>
-              </Link>
-            ))}
-          </div>
+          <h2 className="mt-5 text-[22px] font-bold text-primary">{user.name}</h2>
+          <p className="mt-1.5 text-[14px] text-on-surface-variant">ID: {user.id}</p>
         </section>
 
         <section className="space-y-1">

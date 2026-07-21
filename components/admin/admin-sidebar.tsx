@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
+  FileText,
   FolderTree,
   LayoutDashboard,
   LogOut,
@@ -20,6 +21,7 @@ const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/admin/products", label: "Produk", icon: Package },
   { href: "/admin/categories", label: "Kategori", icon: FolderTree },
+  { href: "/admin/rfqs", label: "RFQ", icon: FileText },
   { href: "/admin/users", label: "Pengguna", icon: Users, superadminOnly: true },
 ];
 

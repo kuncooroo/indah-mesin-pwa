@@ -5,10 +5,9 @@ import { Check } from "lucide-react";
 
 import { BackLink } from "@/components/shared/back-link";
 import {
+  catalogBrandOptions,
   catalogCategoryOptions,
-  catalogColorOptions,
   catalogProductTypeOptions,
-  catalogSortOptions,
   defaultCatalogFilters,
   formatFilterPrice,
   parseFilterPriceInput,
@@ -31,12 +30,10 @@ function FilterChip({
   label,
   active,
   onClick,
-  variant = "filled",
 }: {
   label: string;
   active: boolean;
   onClick: () => void;
-  variant?: "filled" | "outline";
 }) {
   return (
     <button
@@ -44,14 +41,9 @@ function FilterChip({
       onClick={onClick}
       className={cn(
         "rounded-full px-3.5 py-2 text-[12px] font-semibold transition-colors",
-        variant === "filled" &&
-          (active
-            ? "bg-primary text-white"
-            : "border border-border-subtle bg-white text-on-surface"),
-        variant === "outline" &&
-          (active
-            ? "border-2 border-primary bg-white text-primary"
-            : "border border-border-subtle bg-white text-on-surface"),
+        active
+          ? "bg-primary text-white"
+          : "border border-border-subtle bg-white text-on-surface",
       )}
     >
       {label}
@@ -159,7 +151,7 @@ export function ProductFilterPanel({
   }
 
   function handleReset() {
-    setDraft(defaultCatalogFilters);
+    setDraft({ ...defaultCatalogFilters, sortBy: appliedFilters.sortBy });
   }
 
   function handleApply(closeAfter = false) {
@@ -183,7 +175,7 @@ export function ProductFilterPanel({
         </div>
       </header>
 
-      <div className="flex-1 overflow-y-auto px-4 py-5 pb-28">
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-5">
         <section className="mb-7">
           <h2 className="mb-3 text-[14px] font-bold text-primary">Kategori</h2>
           <div className="flex flex-wrap gap-2">
@@ -199,9 +191,21 @@ export function ProductFilterPanel({
         </section>
 
         <section className="mb-7">
-          <h2 className="mb-3 text-[14px] font-bold text-primary">
-            Rentang Harga
-          </h2>
+          <h2 className="mb-3 text-[14px] font-bold text-primary">Jenis Produk</h2>
+          <div className="flex flex-wrap gap-2">
+            {catalogProductTypeOptions.map((option) => (
+              <FilterChip
+                key={option.id}
+                label={option.label}
+                active={draft.productType === option.id}
+                onClick={() => updateDraft({ productType: option.id })}
+              />
+            ))}
+          </div>
+        </section>
+
+        <section className="mb-7">
+          <h2 className="mb-3 text-[14px] font-bold text-primary">Harga</h2>
           <PriceRangeSlider
             minValue={draft.minPrice}
             maxValue={draft.maxPrice}
@@ -249,151 +253,50 @@ export function ProductFilterPanel({
         </section>
 
         <section className="mb-7">
-          <h2 className="mb-3 text-[14px] font-bold text-primary">Produk</h2>
+          <h2 className="mb-3 text-[14px] font-bold text-primary">Brand</h2>
           <div className="flex flex-wrap gap-2">
-            {catalogProductTypeOptions.map((option) => (
+            {catalogBrandOptions.map((option) => (
               <FilterChip
                 key={option.id}
                 label={option.label}
-                variant="outline"
-                active={draft.productType === option.id}
-                onClick={() => updateDraft({ productType: option.id })}
+                active={draft.brand === option.id}
+                onClick={() => updateDraft({ brand: option.id })}
               />
-            ))}
-          </div>
-        </section>
-
-        <section className="mb-7">
-          <h2 className="mb-3 text-[14px] font-bold text-primary">Warna</h2>
-          <div className="flex flex-wrap gap-3">
-            {catalogColorOptions.map((option) => {
-              const isActive = draft.color === option.id;
-
-              return (
-                <button
-                  key={option.id}
-                  type="button"
-                  aria-label={option.label}
-                  onClick={() =>
-                    updateDraft({
-                      color: isActive ? "all" : option.id,
-                    })
-                  }
-                  className={cn(
-                    "flex size-9 items-center justify-center rounded-full transition-transform",
-                    option.border && "border border-border-subtle",
-                    isActive && "ring-2 ring-primary ring-offset-2",
-                  )}
-                  style={{ backgroundColor: option.hex }}
-                >
-                  {isActive ? (
-                    <Check
-                      className={cn(
-                        "size-4",
-                        option.id === "white" || option.id === "grey"
-                          ? "text-primary"
-                          : "text-white",
-                      )}
-                      strokeWidth={3}
-                    />
-                  ) : null}
-                </button>
-              );
-            })}
-          </div>
-        </section>
-
-        <section className="mb-7">
-          <h2 className="mb-3 text-[14px] font-bold text-primary">Urutkan</h2>
-          <div className="space-y-3">
-            {catalogSortOptions.map((option) => (
-              <label
-                key={option.value}
-                className="flex cursor-pointer items-center gap-3"
-              >
-                <span
-                  className={cn(
-                    "flex size-5 items-center justify-center rounded-full border-2",
-                    draft.sortBy === option.value
-                      ? "border-primary"
-                      : "border-border-subtle",
-                  )}
-                >
-                  {draft.sortBy === option.value ? (
-                    <span className="size-2.5 rounded-full bg-primary" />
-                  ) : null}
-                </span>
-                <input
-                  type="radio"
-                  name="sort"
-                  value={option.value}
-                  checked={draft.sortBy === option.value}
-                  onChange={() => updateDraft({ sortBy: option.value })}
-                  className="sr-only"
-                />
-                <span className="text-[13px] text-on-surface">{option.label}</span>
-              </label>
             ))}
           </div>
         </section>
 
         <section>
-          <h2 className="mb-3 text-[14px] font-bold text-primary">
-            Ketersediaan
-          </h2>
-          <div className="space-y-3">
-            <label className="flex cursor-pointer items-center gap-3">
-              <span
-                className={cn(
-                  "flex size-5 items-center justify-center rounded-md border-2",
-                  draft.available
-                    ? "border-primary bg-primary text-white"
-                    : "border-border-subtle bg-white",
-                )}
-              >
-                {draft.available ? (
-                  <Check className="size-3.5" strokeWidth={3} />
-                ) : null}
-              </span>
-              <input
-                type="checkbox"
-                checked={draft.available}
-                onChange={(event) =>
-                  updateDraft({ available: event.target.checked })
-                }
-                className="sr-only"
-              />
-              <span className="text-[13px] text-on-surface">Tersedia</span>
-            </label>
-
-            <label className="flex cursor-pointer items-center gap-3">
-              <span
-                className={cn(
-                  "flex size-5 items-center justify-center rounded-md border-2",
-                  draft.limitedStock
-                    ? "border-primary bg-primary text-white"
-                    : "border-border-subtle bg-white",
-                )}
-              >
-                {draft.limitedStock ? (
-                  <Check className="size-3.5" strokeWidth={3} />
-                ) : null}
-              </span>
-              <input
-                type="checkbox"
-                checked={draft.limitedStock}
-                onChange={(event) =>
-                  updateDraft({ limitedStock: event.target.checked })
-                }
-                className="sr-only"
-              />
-              <span className="text-[13px] text-on-surface">Stok terbatas</span>
-            </label>
-          </div>
+          <h2 className="mb-3 text-[14px] font-bold text-primary">Ready Stock</h2>
+          <label className="flex cursor-pointer items-center gap-3">
+            <span
+              className={cn(
+                "flex size-5 items-center justify-center rounded-md border-2",
+                draft.readyStock
+                  ? "border-primary bg-primary text-white"
+                  : "border-border-subtle bg-white",
+              )}
+            >
+              {draft.readyStock ? (
+                <Check className="size-3.5" strokeWidth={3} />
+              ) : null}
+            </span>
+            <input
+              type="checkbox"
+              checked={draft.readyStock}
+              onChange={(event) =>
+                updateDraft({ readyStock: event.target.checked })
+              }
+              className="sr-only"
+            />
+            <span className="text-[13px] text-on-surface">
+              Tampilkan produk ready stock saja
+            </span>
+          </label>
         </section>
       </div>
 
-      <div className="absolute right-0 bottom-0 left-0 border-t border-border-subtle bg-white px-4 py-3">
+      <div className="shrink-0 border-t border-border-subtle bg-white px-4 pt-3 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
         <div className="grid grid-cols-2 gap-3">
           <button
             type="button"

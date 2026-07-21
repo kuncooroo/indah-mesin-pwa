@@ -1,23 +1,21 @@
 export type CatalogFilterState = {
   category: string;
+  productType: string;
   minPrice: number;
   maxPrice: number;
-  productType: string;
-  color: string;
+  brand: string;
+  readyStock: boolean;
   sortBy: string;
-  available: boolean;
-  limitedStock: boolean;
 };
 
 export const defaultCatalogFilters: CatalogFilterState = {
   category: "all",
+  productType: "all",
   minPrice: 0,
   maxPrice: 1_000_000_000,
-  productType: "all",
-  color: "all",
+  brand: "all",
+  readyStock: false,
   sortBy: "newest",
-  available: true,
-  limitedStock: false,
 };
 
 export const catalogCategoryOptions = [
@@ -41,20 +39,20 @@ export const catalogProductTypeOptions = [
   { id: "spare-part", label: "Spare Part" },
 ];
 
-export const catalogColorOptions = [
-  { id: "blue", label: "Biru", hex: "#2563eb" },
-  { id: "grey", label: "Abu", hex: "#64748b" },
-  { id: "teal", label: "Teal", hex: "#0d9488" },
-  { id: "orange", label: "Orange", hex: "#ea580c" },
-  { id: "black", label: "Hitam", hex: "#1e293b" },
-  { id: "white", label: "Putih", hex: "#ffffff", border: true },
+export const catalogBrandOptions = [
+  { id: "all", label: "Semua Brand" },
+  { id: "industrialx", label: "IndustrialX" },
+  { id: "siemens", label: "Siemens" },
+  { id: "grundfos", label: "Grundfos" },
+  { id: "omron", label: "Omron" },
 ];
 
 export const catalogSortOptions = [
   { value: "newest", label: "Terbaru" },
   { value: "bestseller", label: "Terlaris" },
-  { value: "price-asc", label: "Harga: Rendah ke Tinggi" },
-  { value: "price-desc", label: "Harga: Tinggi ke Rendah" },
+  { value: "price-asc", label: "Harga Terendah" },
+  { value: "price-desc", label: "Harga Tertinggi" },
+  { value: "name-asc", label: "Nama A–Z" },
 ];
 
 export const priceSliderMax = 1_000_000_000;

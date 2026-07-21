@@ -25,3 +25,25 @@ export function productOrderMessage(product: {
     "Mohon informasi mengenai ketersediaan stok, estimasi waktu pengiriman (indent), serta draft surat penawaran resmi (Quotation) untuk perusahaan kami. Terima kasih.",
   ].join("\n");
 }
+
+export function rfqWhatsAppMessage(input: {
+  customerName: string;
+  rfqNumber: string;
+  pdfUrl: string;
+  origin?: string;
+}): string {
+  const pdfLink = input.origin
+    ? `${input.origin}${input.pdfUrl}`
+    : input.pdfUrl;
+
+  return [
+    "Halo Admin.",
+    "",
+    "Saya ingin meminta penawaran.",
+    "",
+    `Nomor RFQ: ${input.rfqNumber}`,
+    "",
+    "Silakan lihat PDF berikut.",
+    pdfLink,
+  ].join("\n");
+}

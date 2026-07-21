@@ -73,3 +73,25 @@ model Product {
   @@index([isActive, isFeatured])
   @@map("products")
 }
+
+enum RfqStatus {
+  PENDING
+  REVIEWED
+  QUOTED
+  CLOSED
+}
+
+model Rfq {
+  id           String    @id @default(cuid())
+  number       String    @unique
+  customerName String    @map("customer_name")
+  customerId   String?   @map("customer_id")
+  status       RfqStatus @default(PENDING)
+  pdfUrl       String    @map("pdf_url") @db.Text
+  items        Json
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  @@index([status, createdAt])
+  @@map("rfqs")
+}
