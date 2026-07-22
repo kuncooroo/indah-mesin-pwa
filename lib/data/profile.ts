@@ -22,7 +22,7 @@ export type ProfileMenuItem = {
 };
 
 export const profileMenuItems: ProfileMenuItem[] = [
-  { id: "privacy", label: "Kebijakan Privasi", icon: "shield", href: "#" },
+  { id: "privacy", label: "Kebijakan Privasi", icon: "shield", href: "/kebijakan-privasi" },
   { id: "settings", label: "Pengaturan", icon: "settings", href: "#" },
   { id: "help", label: "Bantuan", icon: "help", href: "/bantuan" },
   { id: "logout", label: "Keluar", icon: "logout", action: "logout" },
