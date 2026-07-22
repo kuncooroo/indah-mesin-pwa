@@ -93,7 +93,7 @@ export function AppHeader({
 export const desktopNavLinks = [
   { label: "Home", href: "/" },
   { label: "Produk", href: "/produk" },
-  { label: "Saved", href: "/simpanan" },
+  { label: "Saved", href: "/favorit" },
   { label: "Akun", href: "/akun" },
 ];
 

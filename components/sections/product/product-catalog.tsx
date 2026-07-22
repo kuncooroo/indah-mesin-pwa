@@ -19,11 +19,15 @@ import {
   defaultCatalogFilters,
   type CatalogFilterState,
 } from "@/lib/data/catalog-filters";
-import { filterCatalogProducts } from "@/lib/data/product-catalog";
+import {
+  filterCatalogProducts,
+  type CatalogProduct,
+} from "@/lib/data/product-catalog";
 import { cn } from "@/lib/utils";
 
 type ProductCatalogProps = {
   initialFilter?: string;
+  products: CatalogProduct[];
 };
 
 type ViewMode = "grid" | "list";
@@ -31,7 +35,10 @@ type ViewMode = "grid" | "list";
 const PAGE_SIZE_GRID = 4;
 const PAGE_SIZE_LIST = 5;
 
-export function ProductCatalog({ initialFilter = "all" }: ProductCatalogProps) {
+export function ProductCatalog({
+  initialFilter = "all",
+  products,
+}: ProductCatalogProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilter, setShowFilter] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
@@ -44,8 +51,8 @@ export function ProductCatalog({ initialFilter = "all" }: ProductCatalogProps) {
   const pageSize = viewMode === "grid" ? PAGE_SIZE_GRID : PAGE_SIZE_LIST;
 
   const filteredProducts = useMemo(
-    () => filterCatalogProducts(appliedFilters, searchQuery),
-    [appliedFilters, searchQuery],
+    () => filterCatalogProducts(products, appliedFilters, searchQuery),
+    [products, appliedFilters, searchQuery],
   );
 
   const totalPages = Math.max(1, Math.ceil(filteredProducts.length / pageSize));
@@ -85,8 +92,8 @@ export function ProductCatalog({ initialFilter = "all" }: ProductCatalogProps) {
   }
 
   return (
-    <div className="pb-24">
-      <header className="sticky top-0 z-40 border-b border-border-subtle bg-white/95 px-4 py-3 backdrop-blur-md">
+    <div className="pb-2">
+      <header className="sticky top-0 z-40 border-b border-border-subtle bg-white px-4 py-3">
         <div className="mb-3 flex items-center justify-between">
           <BackLink href="/" />
           <div className="min-w-0 flex-1 text-center">
@@ -106,14 +113,14 @@ export function ProductCatalog({ initialFilter = "all" }: ProductCatalogProps) {
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
               placeholder="Cari produk retort, sterilizer, atau aksesoris..."
-              className="h-10 w-full rounded-xl border border-border-subtle bg-[#f8fafc] pr-3 pl-9 text-[12px] outline-none placeholder:text-on-surface-variant/70"
+              className="h-10 w-full rounded-xl border border-border-subtle bg-white pr-3 pl-9 text-[12px] outline-none placeholder:text-on-surface-variant/70"
             />
           </div>
           <button
             type="button"
             aria-label={viewMode === "grid" ? "Tampilan list" : "Tampilan grid"}
             onClick={toggleViewMode}
-            className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl border border-border-subtle bg-[#f8fafc] text-primary"
+            className="inline-flex size-10 shrink-0 items-center justify-center rounded-xl border border-border-subtle bg-white text-primary"
           >
             {viewMode === "grid" ? (
               <LayoutList className="size-[18px]" strokeWidth={2.2} />
@@ -240,6 +247,7 @@ export function ProductCatalog({ initialFilter = "all" }: ProductCatalogProps) {
         open={showFilter}
         appliedFilters={appliedFilters}
         searchQuery={searchQuery}
+        products={products}
         onClose={() => setShowFilter(false)}
         onApply={handleApplyFilters}
       />

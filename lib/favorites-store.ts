@@ -1,5 +1,4 @@
 import type { FavoriteItem } from "@/lib/data/favorites";
-import { favoriteItems as defaultFavorites } from "@/lib/data/favorites";
 
 const STORAGE_KEY = "industrialx_favorites";
 
@@ -15,20 +14,22 @@ export type FavoriteProductInput = {
 };
 
 function readStorage(): FavoriteItem[] {
-  if (typeof window === "undefined") return defaultFavorites;
+  if (typeof window === "undefined") return [];
 
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return defaultFavorites;
+    if (!raw) return [];
     const parsed = JSON.parse(raw) as FavoriteItem[];
-    if (!Array.isArray(parsed)) return defaultFavorites;
+    if (!Array.isArray(parsed)) return [];
     return parsed.map((item) => ({
       ...item,
+      quantity: 1,
+      note: "",
       statusLabel: item.statusLabel ?? "Ready Stock",
       categoryLabel: item.categoryLabel ?? "Produk",
     }));
   } catch {
-    return defaultFavorites;
+    return [];
   }
 }
 
@@ -75,6 +76,10 @@ export function toggleFavorite(input: FavoriteProductInput): boolean {
   ]);
 
   return true;
+}
+
+export function getFavoritesCount(): number {
+  return readStorage().length;
 }
 
 export function favoriteProductId(slug: string, name: string): string {

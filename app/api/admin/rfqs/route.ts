@@ -13,11 +13,13 @@ export async function GET() {
       rfqs.map((rfq) => ({
         id: rfq.id,
         number: rfq.number,
-        customerName: rfq.customerName,
+        companyName: rfq.companyName,
+        picName: rfq.picName,
         customerId: rfq.customerId,
         status: rfq.status,
         pdfUrl: rfq.pdfUrl,
         itemCount: Array.isArray(rfq.items) ? rfq.items.length : 0,
+        submittedAt: rfq.submittedAt.toISOString(),
         createdAt: rfq.createdAt.toISOString(),
       })),
     );

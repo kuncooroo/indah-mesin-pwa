@@ -2,9 +2,13 @@ import Image from "next/image";
 import Link from "next/link";
 
 import { SectionHeading } from "@/components/shared/section-heading";
-import { articles } from "@/lib/data/articles";
+import type { Article } from "@/lib/data/articles";
 
-export function UsefulArticlesSection() {
+type UsefulArticlesSectionProps = {
+  articles: Article[];
+};
+
+export function UsefulArticlesSection({ articles }: UsefulArticlesSectionProps) {
   const previewArticles = articles.filter((article) => !article.featured).slice(0, 2);
 
   if (!previewArticles.length) return null;
@@ -19,7 +23,7 @@ export function UsefulArticlesSection() {
             href={`/berita/${article.slug}`}
             className="flex gap-3 rounded-2xl border border-border-subtle bg-white p-3 shadow-sm transition-colors hover:border-primary"
           >
-            <div className="relative size-[72px] shrink-0 overflow-hidden rounded-xl bg-[#eef4ff]">
+            <div className="relative size-[72px] shrink-0 overflow-hidden rounded-xl bg-surface-container">
               <Image
                 src={article.image}
                 alt={article.title}

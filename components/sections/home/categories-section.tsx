@@ -31,7 +31,7 @@ export function CategoriesSection() {
               key={service.id}
               className="group flex w-[78px] shrink-0 cursor-pointer flex-col items-center gap-2"
             >
-              <div className="flex size-[72px] items-center justify-center rounded-2xl border border-border-subtle bg-[#eef4ff] text-primary transition-colors group-hover:border-primary group-hover:bg-[#dbeafe]">
+              <div className="flex size-[72px] items-center justify-center rounded-2xl border border-border-subtle bg-surface-container text-primary transition-colors group-hover:border-primary group-hover:bg-[#dbeafe]">
                 <Icon className="size-8" strokeWidth={2} />
               </div>
               <span className="text-center text-[11px] font-medium leading-tight text-on-surface">

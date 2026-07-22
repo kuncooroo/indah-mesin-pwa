@@ -5,43 +5,51 @@
   --font-sans: var(--font-ibm-plex-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
 
-  --color-background: #faf8ff;
+  --color-background: #ffffff;
   --color-foreground: #1a1b21;
-  --color-surface: #faf8ff;
-  --color-surface-dim: #dad9e1;
-  --color-surface-bright: #faf8ff;
-  --color-surface-container: #eeedf4;
-  --color-surface-container-low: #f4f3fa;
-  --color-surface-container-high: #e9e7ef;
-  --color-surface-container-highest: #e3e1e9;
+  --color-surface: #ffffff;
+  --color-surface-dim: #e2e8f0;
+  --color-surface-bright: #ffffff;
+  --color-surface-container: #eff6ff;
+  --color-surface-container-low: #f8fafc;
+  --color-surface-container-high: #dbeafe;
+  --color-surface-container-highest: #bfdbfe;
   --color-surface-container-lowest: #ffffff;
-  --color-surface-variant: #e3e1e9;
+  --color-surface-variant: #f1f5f9;
   --color-on-surface: #1a1b21;
   --color-on-surface-variant: #444651;
   --color-on-background: #1a1b21;
   --color-primary: #00236f;
+  --color-primary-foreground: #ffffff;
   --color-primary-container: #1e3a8a;
   --color-on-primary: #ffffff;
-  --color-on-primary-container: #90a8ff;
   --color-secondary: #006d2f;
-  --color-secondary-container: #5dfd8a;
-  --color-on-secondary: #ffffff;
-  --color-on-secondary-container: #007232;
+  --color-secondary-foreground: #ffffff;
+  --color-muted: #f1f5f9;
+  --color-muted-foreground: #64748b;
+  --color-card: #ffffff;
+  --color-card-foreground: #1a1b21;
+  --color-border: #e2e8f0;
+  --color-input: #e2e8f0;
+  --color-ring: #00236f;
+  --color-destructive: #ba1a1a;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #1a1b21;
   --color-tertiary: #1b2b3f;
   --color-tertiary-container: #314156;
   --color-on-tertiary: #ffffff;
   --color-on-tertiary-container: #9dadc6;
-  --color-outline: #757682;
-  --color-outline-variant: #c5c5d3;
+  --color-outline: #94a3b8;
+  --color-outline-variant: #cbd5e1;
   --color-border-subtle: #e2e8f0;
-  --color-metallic-bg: #f3f4f6;
+  --color-metallic-bg: #f8fafc;
   --color-status-ready: #10b981;
   --color-status-indent: #f59e0b;
   --color-error: #ba1a1a;
   --color-on-error: #ffffff;
   --color-whatsapp: #25d366;
   --color-inverse-surface: #2f3036;
-  --color-inverse-on-surface: #f1f0f7;
+  --color-inverse-on-surface: #f8fafc;
 
   --spacing-margin-mobile: 1rem;
   --spacing-margin-desktop: 2rem;
@@ -213,11 +221,7 @@ img {
 
 .app-background {
   min-height: 100dvh;
-  background: radial-gradient(
-    circle at top,
-    rgb(255 255 255 / 0.95),
-    rgb(238 241 243 / 0.75) 45%
-  );
+  background: #ffffff;
 }
 
 .mobile-app-shell {
@@ -226,7 +230,7 @@ img {
   min-height: 100dvh;
   margin-inline: auto;
   overflow-x: hidden;
-  background: var(--color-surface);
+  background: #ffffff;
   container-type: inline-size;
   container-name: app-shell;
 }
@@ -234,6 +238,7 @@ img {
 @media (min-width: 520px) {
   .app-background {
     padding-block: 14px;
+    background: #f8fafc;
   }
 
   .mobile-app-shell {

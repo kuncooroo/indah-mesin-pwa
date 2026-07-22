@@ -63,7 +63,7 @@ export function EditProfileSection() {
             </button>
           </div>
 
-          <div className="mt-4 w-full rounded-2xl bg-[#eef4ff] px-4 py-3 text-center">
+          <div className="mt-4 w-full rounded-2xl bg-surface-container px-4 py-3 text-center">
             <p className="text-[16px] font-bold text-primary">{form.name}</p>
             <p className="mt-0.5 text-[12px] text-on-surface-variant">ID: {form.id}</p>
           </div>

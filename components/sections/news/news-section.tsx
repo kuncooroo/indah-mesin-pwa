@@ -8,11 +8,13 @@ import { Calendar, Search, Star } from "lucide-react";
 import { BackLink } from "@/components/shared/back-link";
 import {
   articleCategories,
-  articles,
-  getFeaturedArticle,
+  type Article,
 } from "@/lib/data/articles";
-import type { Article } from "@/lib/data/articles";
 import { cn } from "@/lib/utils";
+
+function getFeaturedArticle(articles: Article[]) {
+  return articles.find((article) => article.featured) ?? articles[0] ?? null;
+}
 
 function FeaturedArticleCard({ article }: { article: Article }) {
   return (
@@ -55,7 +57,7 @@ function ArticleListItem({ article }: { article: Article }) {
       href={`/berita/${article.slug}`}
       className="flex gap-3 rounded-2xl border border-border-subtle bg-white p-3 shadow-sm"
     >
-      <div className="relative size-[88px] shrink-0 overflow-hidden rounded-xl bg-[#eef4ff]">
+      <div className="relative size-[88px] shrink-0 overflow-hidden rounded-xl bg-surface-container">
         <Image
           src={article.image}
           alt={article.title}
@@ -83,11 +85,15 @@ function ArticleListItem({ article }: { article: Article }) {
   );
 }
 
-export function NewsSection() {
+type NewsSectionProps = {
+  articles: Article[];
+};
+
+export function NewsSection({ articles }: NewsSectionProps) {
   const [activeCategory, setActiveCategory] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const featured = getFeaturedArticle();
+  const featured = getFeaturedArticle(articles);
 
   const latestArticles = useMemo(() => {
     let list = articles.filter((article) => !article.featured);
@@ -106,7 +112,7 @@ export function NewsSection() {
     }
 
     return list;
-  }, [activeCategory, searchQuery]);
+  }, [articles, activeCategory, searchQuery]);
 
   return (
     <div className="pb-6">

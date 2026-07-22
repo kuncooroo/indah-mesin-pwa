@@ -1,19 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import {
+  AdminListToolbar,
+  getRowNumber,
+  useAdminListState,
+} from "@/lib/admin/list-utils";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { AdminDialogContent } from "@/components/admin/admin-dialog-content";
 import {
   Dialog,
-  DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -46,6 +51,25 @@ export function CategoriesManager() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<CategoryForm>(emptyForm);
   const [saving, setSaving] = useState(false);
+
+  const getSearchText = useCallback(
+    (category: AdminCategory) =>
+      [category.label, category.slug, category.icon, category.description]
+        .filter(Boolean)
+        .join(" "),
+    [],
+  );
+
+  const {
+    search,
+    setSearch,
+    page,
+    setPage,
+    totalPages,
+    paginated,
+    filtered,
+    pageSize,
+  } = useAdminListState(categories, getSearchText);
 
   async function loadCategories() {
     setLoading(true);
@@ -145,10 +169,22 @@ export function CategoriesManager() {
           {loading ? (
             <p className="text-sm text-muted-foreground">Memuat...</p>
           ) : (
+            <>
+              <AdminListToolbar
+                search={search}
+                onSearchChange={setSearch}
+                placeholder="Cari kategori..."
+                page={page}
+                totalPages={totalPages}
+                totalItems={filtered.length}
+                pageSize={pageSize}
+                onPageChange={setPage}
+              />
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b text-left text-muted-foreground">
+                    <th className="pb-3 pr-4 font-medium w-10">No</th>
                     <th className="pb-3 pr-4 font-medium">Label</th>
                     <th className="pb-3 pr-4 font-medium">Slug</th>
                     <th className="pb-3 pr-4 font-medium">Produk</th>
@@ -157,8 +193,11 @@ export function CategoriesManager() {
                   </tr>
                 </thead>
                 <tbody>
-                  {categories.map((category) => (
+                  {paginated.map((category, index) => (
                     <tr key={category.id} className="border-b last:border-0">
+                      <td className="py-3 pr-4 text-muted-foreground">
+                        {getRowNumber(page, index, pageSize)}
+                      </td>
                       <td className="py-3 pr-4 font-medium">{category.label}</td>
                       <td className="py-3 pr-4 text-muted-foreground">{category.slug}</td>
                       <td className="py-3 pr-4">{category._count?.products ?? 0}</td>
@@ -188,12 +227,13 @@ export function CategoriesManager() {
                 </tbody>
               </table>
             </div>
+            </>
           )}
         </CardContent>
       </Card>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-lg">
+        <AdminDialogContent>
           <DialogHeader>
             <DialogTitle>
               {editingId ? "Edit Kategori" : "Tambah Kategori"}
@@ -265,7 +305,7 @@ export function CategoriesManager() {
               </Button>
             </DialogFooter>
           </form>
-        </DialogContent>
+        </AdminDialogContent>
       </Dialog>
     </div>
   );

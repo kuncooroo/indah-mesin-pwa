@@ -13,6 +13,11 @@ export type Product = {
   statusLabel: string;
   priceLabel: string;
   priceNote?: string;
+  minOrder?: number;
+  rating?: number;
+  soldCount?: number;
+  soldLabel?: string;
+  isFeatured?: boolean;
   features?: string[];
   specifications?: ProductSpecification[];
   downloads?: ProductDownload[];

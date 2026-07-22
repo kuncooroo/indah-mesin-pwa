@@ -1,59 +1,51 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { Check, Download, FileText, Heart, Share2, Star } from "lucide-react";
+import { Check, CheckCircle2, Download, FileText, Heart, MessageCircle, Share2, ShoppingCart, Star } from "lucide-react";
 
 import { BackLink } from "@/components/shared/back-link";
 import { ProductThumb } from "@/components/shared/product-thumb";
 import { useFavoriteState } from "@/components/shared/favorite-button";
 import { getProductDownloads } from "@/lib/data/product-downloads";
-import { getProductTestimonials } from "@/lib/data/product-testimonials";
+import type { ProductTestimonial } from "@/lib/data/product-testimonials";
+import { favoriteProductId } from "@/lib/favorites-store";
+import {
+  addToRfqCart,
+  setSingleProductRfq,
+} from "@/lib/rfq-cart-store";
 import type { Product } from "@/lib/types";
 import { productOrderMessage, waUrl } from "@/lib/whatsapp";
 import { cn } from "@/lib/utils";
-
-const productDisplayOverrides: Record<
-  string,
-  {
-    title?: string;
-    headerTitle?: string;
-    priceRangeLabel?: string;
-    rating?: number;
-    reviewCount?: number;
-    soldLabel?: string;
-  }
-> = {
-  "industrial-retort-sterilizer": {
-    title: "Industrial Retort Sterilizer",
-    headerTitle: "Retort",
-    priceRangeLabel: "Rp 650.000.000 – Rp 850.000.000",
-    rating: 4.8,
-    reviewCount: 24,
-    soldLabel: "300+ terjual",
-  },
-};
 
 const detailTabs = ["Deskripsi", "Spesifikasi"] as const;
 type DetailTab = (typeof detailTabs)[number];
 
 type ProductDetailViewProps = {
   product: Product;
+  reviews?: ProductTestimonial[];
 };
 
-export function ProductDetailView({ product }: ProductDetailViewProps) {
+export function ProductDetailView({
+  product,
+  reviews = [],
+}: ProductDetailViewProps) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<DetailTab>("Deskripsi");
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [shareMessage, setShareMessage] = useState<string | null>(null);
+  const [cartToast, setCartToast] = useState(false);
 
-  const overrides = productDisplayOverrides[product.slug] ?? {};
-  const title = overrides.title ?? product.name;
-  const headerTitle = overrides.headerTitle ?? product.categoryLabel;
-  const priceRangeLabel =
-    overrides.priceRangeLabel ??
-    product.priceLabel.replace(/\+$/, "").concat(" – Hubungi Kami");
-  const rating = overrides.rating ?? 4.7;
-  const reviewCount = overrides.reviewCount ?? 18;
-  const soldLabel = overrides.soldLabel ?? "120+ terjual";
+  const productId = favoriteProductId(product.slug, product.name);
+  const minOrder = product.minOrder ?? 1;
+
+  const title = product.name;
+  const headerTitle = product.categoryLabel;
+  const priceRangeLabel = product.priceLabel.replace(/\+$/, "").concat(" – Hubungi Kami");
+  const rating = product.rating ?? 0;
+  const reviewCount = reviews.length;
+  const soldLabel = product.soldLabel ?? "Baru";
 
   const { active: favorited, toggle: toggleFavorite } = useFavoriteState(
     product.slug,
@@ -76,10 +68,7 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
     [product.slug, product.downloads],
   );
 
-  const testimonials = useMemo(
-    () => getProductTestimonials(product.slug),
-    [product.slug],
-  );
+  const testimonials = reviews;
 
   const productUrl =
     typeof window !== "undefined"
@@ -117,13 +106,36 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
     }
   }
 
+  function productInput() {
+    return {
+      id: productId,
+      slug: product.slug,
+      name: product.name,
+      priceLabel: priceRangeLabel,
+      image: product.image,
+      description: product.description,
+      statusLabel: product.statusLabel,
+      categoryLabel: product.categoryLabel,
+    };
+  }
+
+  function handleAddToCart() {
+    addToRfqCart(productInput());
+    setCartToast(true);
+  }
+
+  function handleBuatRfq() {
+    setSingleProductRfq(productInput());
+    router.push("/simpanan/rfq/permintaan");
+  }
+
   const descriptionText = product.description;
   const featureList = product.features ?? [];
   const specifications = product.specifications ?? [];
 
   return (
-    <div className="pb-6">
-      <header className="sticky top-0 z-40 border-b border-border-subtle bg-white/95 backdrop-blur-md">
+    <div className="bg-white">
+      <header className="sticky top-0 z-40 border-b border-border-subtle bg-white px-4 py-3">
         <div className="flex items-center justify-between px-4 py-3">
           <BackLink href="/produk" />
           <h1 className="text-[17px] font-bold text-primary">{headerTitle}</h1>
@@ -131,7 +143,7 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
         </div>
       </header>
 
-      <main className="px-4 pt-4">
+      <main className="px-4 pt-4 pb-4">
         <section className="space-y-3">
           <div className="relative overflow-hidden rounded-3xl">
             <ProductThumb className="aspect-[4/3] w-full" iconClassName="size-20" />
@@ -154,6 +166,8 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
                     priceLabel: priceRangeLabel,
                     image: product.image,
                     description: product.description,
+                    statusLabel: product.statusLabel,
+                    categoryLabel: product.categoryLabel,
                   })
                 }
                 className="flex size-9 items-center justify-center rounded-full bg-white/95 text-primary shadow-md"
@@ -194,13 +208,19 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
         <section className="mt-5 space-y-4">
           <div>
             <h2 className="text-[20px] leading-snug font-bold text-primary">{title}</h2>
-            <p className="mt-2 text-[13px] font-semibold text-primary">{priceRangeLabel}</p>
+            <p className="mt-2 text-[13px] font-semibold text-primary">Hubungi Kami</p>
+            <p className="mt-1 text-[11px] text-on-surface-variant">
+              {priceRangeLabel}
+            </p>
             {product.priceNote ? (
               <p className="mt-1 text-[11px] text-on-surface-variant">{product.priceNote}</p>
             ) : null}
+            <p className="mt-2 text-[12px] text-on-surface-variant">
+              Minimum Order: <span className="font-semibold text-primary">{minOrder} Unit</span>
+            </p>
           </div>
 
-          <div className="rounded-2xl border border-border-subtle bg-[#f8fafc] p-4">
+          <div className="rounded-2xl border border-border-subtle bg-white p-4">
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-[13px] font-semibold text-primary">Ulasan & Rating</p>
@@ -289,8 +309,8 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
                       <div
                         key={spec.attribute}
                         className={cn(
-                          "grid grid-cols-2 gap-3 px-4 py-3 text-[12px]",
-                          index % 2 === 0 ? "bg-[#f8fafc]" : "bg-white",
+                          "grid grid-cols-2 gap-3 px-4 py-3 text-[12px] bg-white",
+                          index > 0 && "border-t border-border-subtle",
                         )}
                       >
                         <span className="font-semibold text-on-surface-variant">
@@ -398,16 +418,66 @@ export function ProductDetailView({ product }: ProductDetailViewProps) {
             </div>
           ) : null}
 
-          <a
-            href={waHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex h-12 w-full items-center justify-center rounded-2xl bg-primary text-[15px] font-semibold text-white shadow-sm"
-          >
-            Hubungi Admin
-          </a>
+          <div className="mt-6 flex items-center gap-3 border-t border-border-subtle pt-4">
+            <a
+              href={waHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Chat admin"
+              className="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-border-subtle bg-white text-primary transition-colors hover:border-primary/30 hover:bg-surface-container"
+            >
+              <MessageCircle className="size-[22px]" strokeWidth={1.8} />
+            </a>
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              aria-label="Tambah ke keranjang RFQ"
+              className="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-border-subtle bg-white text-primary transition-colors hover:border-primary/30 hover:bg-surface-container"
+            >
+              <ShoppingCart className="size-[22px]" strokeWidth={1.8} />
+            </button>
+            <button
+              type="button"
+              onClick={handleBuatRfq}
+              className="inline-flex h-12 min-w-0 flex-1 items-center justify-center gap-2.5 rounded-full bg-primary px-5 text-[15px] font-semibold text-white shadow-[0_4px_16px_rgba(0,35,111,0.28)] transition-colors hover:bg-primary-container"
+            >
+              <FileText className="size-[18px] shrink-0" strokeWidth={2} />
+              Buat RFQ
+            </button>
+          </div>
         </section>
       </main>
+
+      {cartToast ? (
+        <div className="fixed inset-x-0 bottom-24 z-50 mx-auto w-full max-w-[480px] px-4">
+          <div className="rounded-2xl border border-border-subtle bg-white p-4 shadow-lg">
+            <div className="flex items-start gap-3">
+              <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-[#059669]" strokeWidth={2.2} />
+              <div className="min-w-0 flex-1">
+                <p className="text-[13px] font-bold text-primary">
+                  Produk ditambahkan ke keranjang RFQ
+                </p>
+                <div className="mt-3 flex gap-2">
+                  <Link
+                    href="/simpanan"
+                    onClick={() => setCartToast(false)}
+                    className="inline-flex h-9 flex-1 items-center justify-center rounded-xl bg-primary text-[12px] font-semibold text-white"
+                  >
+                    Lihat Keranjang
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => setCartToast(false)}
+                    className="inline-flex h-9 flex-1 items-center justify-center rounded-xl border border-border-subtle text-[12px] font-semibold text-primary"
+                  >
+                    Lanjut Belanja
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

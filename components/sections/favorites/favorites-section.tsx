@@ -3,15 +3,15 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { FileText, Heart, Loader2, Minus, Plus, X } from "lucide-react";
+import { FileText, Minus, Plus, ShoppingCart, X } from "lucide-react";
 
 import { FavoritesHeader } from "@/components/sections/favorites/favorites-header";
 import { ProductThumb } from "@/components/shared/product-thumb";
 import type { FavoriteItem } from "@/lib/data/favorites";
-import { getFavorites, saveFavorites } from "@/lib/favorites-store";
+import { getRfqCartItems, saveRfqCartItems } from "@/lib/rfq-cart-store";
 import { cn } from "@/lib/utils";
 
-function FavoriteCard({
+function RfqCartCard({
   item,
   onRemove,
   onUpdate,
@@ -23,7 +23,7 @@ function FavoriteCard({
   const [showNote, setShowNote] = useState(Boolean(item.note.trim()));
 
   function handleDelete() {
-    if (confirm(`Hapus "${item.name}" dari favorit?`)) {
+    if (confirm(`Hapus "${item.name}" dari keranjang RFQ?`)) {
       onRemove(item.id);
     }
   }
@@ -46,7 +46,7 @@ function FavoriteCard({
       <div className="flex gap-3 pr-8">
         <Link
           href={`/produk/${item.slug}`}
-          className="relative block size-[72px] shrink-0 overflow-hidden rounded-xl bg-[#f8fafc]"
+          className="relative block size-[72px] shrink-0 overflow-hidden rounded-xl bg-white border border-border-subtle"
         >
           <ProductThumb className="size-full" iconClassName="size-8" />
         </Link>
@@ -71,15 +71,15 @@ function FavoriteCard({
               onClick={() => setShowNote(true)}
               className="text-[11px] font-semibold text-primary underline-offset-2 hover:underline"
             >
-              📝 Tambah Catatan
+              Tambah Catatan
             </button>
           ) : (
             <input
               type="text"
               value={item.note}
-              placeholder="Contoh: Steam Retort, spesifikasi khusus..."
+              placeholder="Contoh: Steam system, fuel LPG..."
               onChange={(event) => onUpdate(item.id, { note: event.target.value })}
-              className="h-9 w-full rounded-xl border border-border-subtle bg-[#f8fafc] px-3 text-[11px] text-primary outline-none placeholder:text-on-surface-variant/70"
+              className="h-9 w-full rounded-xl border border-border-subtle bg-white px-3 text-[11px] text-primary outline-none placeholder:text-on-surface-variant/70"
             />
           )}
         </div>
@@ -115,8 +115,6 @@ export function FavoritesSection() {
   const router = useRouter();
   const [items, setItems] = useState<FavoriteItem[]>([]);
   const [hydrated, setHydrated] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const totalItems = useMemo(
     () => items.reduce((sum, item) => sum + item.quantity, 0),
@@ -124,13 +122,13 @@ export function FavoritesSection() {
   );
 
   useEffect(() => {
-    setItems(getFavorites());
+    setItems(getRfqCartItems());
     setHydrated(true);
   }, []);
 
   useEffect(() => {
     if (!hydrated) return;
-    saveFavorites(items);
+    saveRfqCartItems(items);
   }, [items, hydrated]);
 
   function handleRemove(id: string) {
@@ -146,60 +144,26 @@ export function FavoritesSection() {
     );
   }
 
-  async function handleCreateRfq() {
-    if (!items.length || submitting) return;
-
-    setSubmitting(true);
-    setError(null);
-
-    try {
-      const response = await fetch("/api/rfq", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          items: items.map((item) => ({
-            productId: item.id,
-            slug: item.slug,
-            name: item.name,
-            quantity: item.quantity,
-            note: item.note.trim() || undefined,
-          })),
-        }),
-      });
-
-      const payload = await response.json();
-
-      if (!response.ok) {
-        throw new Error(payload.error ?? "Gagal membuat permintaan penawaran.");
-      }
-
-      router.push(`/simpanan/rfq/${encodeURIComponent(payload.data.number)}`);
-    } catch (submitError) {
-      setError(
-        submitError instanceof Error
-          ? submitError.message
-          : "Gagal membuat permintaan penawaran.",
-      );
-    } finally {
-      setSubmitting(false);
-    }
+  function handleContinue() {
+    if (!items.length) return;
+    router.push("/simpanan/rfq/permintaan");
   }
 
   return (
-    <div className={cn("pb-36", items.length > 0 && "pb-44")}>
+    <div className="bg-white">
       <FavoritesHeader />
 
-      <main className={cn("px-4 pt-4", items.length > 0 && "pb-10")}>
+      <main className="px-4 pt-4 pb-4">
         <div className="mb-3 flex items-center gap-2">
-          <Heart className="size-4 fill-primary text-primary" strokeWidth={0} />
-          <h2 className="text-[13px] font-semibold text-primary">Daftar Favorit</h2>
+          <ShoppingCart className="size-4 text-primary" strokeWidth={2.2} />
+          <h2 className="text-[13px] font-semibold text-primary">RFQ Cart</h2>
         </div>
 
         {items.length ? (
           <>
             <div className="space-y-3">
               {items.map((item) => (
-                <FavoriteCard
+                <RfqCartCard
                   key={item.id}
                   item={item}
                   onRemove={handleRemove}
@@ -208,16 +172,21 @@ export function FavoritesSection() {
               ))}
             </div>
 
-            {error ? (
-              <p className="mt-4 rounded-xl bg-[#fef2f2] px-3 py-2 text-[12px] text-[#b91c1c]">
-                {error}
-              </p>
-            ) : null}
+            <div className="mt-6 pb-2">
+              <button
+                type="button"
+                onClick={handleContinue}
+                className="inline-flex h-12 w-full items-center justify-center gap-2.5 rounded-full bg-primary text-[14px] font-semibold text-white shadow-[0_4px_16px_rgba(0,35,111,0.28)] transition-colors hover:bg-primary-container"
+              >
+                <FileText className="size-[18px]" strokeWidth={2} />
+                Buat RFQ ({totalItems} Item)
+              </button>
+            </div>
           </>
         ) : (
           <div className="py-20 text-center">
             <p className="text-[13px] font-medium text-on-surface-variant">
-              Belum ada produk favorit.
+              Belum ada produk di keranjang RFQ.
             </p>
             <Link
               href="/produk"
@@ -228,29 +197,6 @@ export function FavoritesSection() {
           </div>
         )}
       </main>
-
-      {items.length ? (
-        <div className="fixed bottom-24 left-0 right-0 z-40 mx-auto w-full max-w-[480px] border-t border-border-subtle bg-white/95 px-4 pt-5 pb-3 backdrop-blur-md">
-          <button
-            type="button"
-            onClick={handleCreateRfq}
-            disabled={submitting}
-            className={cn(
-              "inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl text-[14px] font-semibold text-white shadow-[0_8px_24px_rgba(37,99,235,0.35)] transition-colors",
-              submitting ? "bg-[#64748b]" : "bg-primary hover:bg-primary-container",
-            )}
-          >
-            {submitting ? (
-              <Loader2 className="size-4 animate-spin" strokeWidth={2.2} />
-            ) : (
-              <FileText className="size-4" strokeWidth={2.2} />
-            )}
-            {submitting
-              ? "Memproses..."
-              : `Buat Permintaan Penawaran (${totalItems} Item)`}
-          </button>
-        </div>
-      ) : null}
     </div>
   );
 }

@@ -1,11 +1,11 @@
 import { format } from "date-fns";
-import { id as localeId } from "date-fns/locale";
-import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import { prisma } from "@/lib/db/prisma";
-import { profileUser } from "@/lib/data/profile";
+import { buildRequestPdf } from "@/lib/documents/pdf-builder";
+import type { CreateRfqPayload } from "@/lib/validations/rfq";
+import { PURCHASE_ESTIMATE_OPTIONS } from "@/lib/validations/rfq";
 
 export type RfqItemInput = {
   productId: string;
@@ -15,20 +15,25 @@ export type RfqItemInput = {
   note?: string;
 };
 
-export type CreateRfqInput = {
-  customerName?: string;
-  customerId?: string;
-  items: RfqItemInput[];
-};
-
 export type RfqRecord = {
   id: string;
   number: string;
-  customerName: string;
   customerId: string | null;
   status: string;
+  companyName: string;
+  picName: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  province: string;
+  country: string;
+  purchaseEstimate: string | null;
+  budget: string | null;
+  generalNote: string | null;
   pdfUrl: string;
   items: RfqItemInput[];
+  submittedAt: Date;
   createdAt: Date;
 };
 
@@ -37,8 +42,8 @@ function sanitizeFileName(number: string): string {
 }
 
 async function generateRfqNumber(date = new Date()): Promise<string> {
-  const datePart = format(date, "yyyyMMdd");
-  const prefix = `RFQ-${datePart}-`;
+  const year = format(date, "yyyy");
+  const prefix = `RFQ-${year}`;
 
   const latest = await prisma.rfq.findFirst({
     where: { number: { startsWith: prefix } },
@@ -47,73 +52,144 @@ async function generateRfqNumber(date = new Date()): Promise<string> {
   });
 
   const nextSequence = latest
-    ? Number.parseInt(latest.number.split("-").pop() ?? "0", 10) + 1
+    ? Number.parseInt(latest.number.slice(prefix.length), 10) + 1
     : 1;
 
-  return `${prefix}${String(nextSequence).padStart(3, "0")}`;
+  return `${prefix}${String(nextSequence).padStart(6, "0")}`;
+}
+
+function purchaseEstimateLabel(value: string | null | undefined): string {
+  if (!value) return "-";
+  return (
+    PURCHASE_ESTIMATE_OPTIONS.find((option) => option.value === value)?.label ??
+    value
+  );
 }
 
 async function buildRfqPdf(input: {
   number: string;
-  customerName: string;
+  companyName: string;
+  picName: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  province: string;
+  country: string;
+  purchaseEstimate: string | null;
+  budget: string | null;
+  generalNote: string | null;
   items: RfqItemInput[];
   createdAt: Date;
 }): Promise<Uint8Array> {
-  const pdfDoc = await PDFDocument.create();
-  const page = pdfDoc.addPage([595, 842]);
-  const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  const productIds = input.items
+    .map((item) => item.productId)
+    .filter((id): id is string => Boolean(id));
 
-  let y = 780;
+  const products = productIds.length
+    ? await prisma.product.findMany({
+        where: { id: { in: productIds } },
+        select: { id: true, sku: true },
+      })
+    : [];
 
-  function drawLine(text: string, options?: { bold?: boolean; size?: number }) {
-    const size = options?.size ?? 11;
-    const activeFont = options?.bold ? fontBold : font;
-    page.drawText(text, { x: 48, y, size, font: activeFont, color: rgb(0.1, 0.15, 0.25) });
-    y -= size + 8;
-  }
+  const skuById = new Map(products.map((product) => [product.id, product.sku]));
 
-  drawLine("Request For Quotation", { bold: true, size: 18 });
-  y -= 4;
-  drawLine("==================");
-  y -= 4;
-  drawLine(`Nomor: ${input.number}`, { bold: true });
-  drawLine(`Customer: ${input.customerName}`);
-  drawLine(
-    `Tanggal: ${format(input.createdAt, "dd MMMM yyyy", { locale: localeId })}`,
-  );
-  y -= 8;
-  drawLine("Produk", { bold: true, size: 13 });
-  y -= 4;
-
-  input.items.forEach((item, index) => {
-    drawLine(`${index + 1}. ${item.name}`, { bold: true });
-    drawLine(`   Qty: ${item.quantity}`);
-    if (item.note?.trim()) {
-      drawLine(`   Catatan: ${item.note.trim()}`);
-    }
-    y -= 4;
-    drawLine("------------------");
+  return buildRequestPdf({
+    number: input.number,
+    companyName: input.companyName,
+    picName: input.picName,
+    email: input.email,
+    phone: input.phone,
+    address: input.address,
+    city: input.city,
+    province: input.province,
+    country: input.country,
+    purchaseEstimateLabel: purchaseEstimateLabel(input.purchaseEstimate),
+    budget: input.budget,
+    generalNote: input.generalNote,
+    items: input.items.map((item) => ({
+      sku: skuById.get(item.productId) ?? item.slug.toUpperCase().slice(0, 16),
+      name: item.name,
+      quantity: item.quantity,
+      unit: "Unit",
+      note: item.note,
+    })),
+    createdAt: input.createdAt,
   });
-
-  return pdfDoc.save();
 }
 
-export async function createRfq(input: CreateRfqInput): Promise<RfqRecord> {
+function mapRfqRecord(rfq: {
+  id: string;
+  number: string;
+  customerId: string | null;
+  customerName?: string | null;
+  status: string;
+  companyName: string;
+  picName: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  province: string;
+  country: string;
+  purchaseEstimate: string | null;
+  budget: string | null;
+  generalNote: string | null;
+  pdfUrl: string;
+  items: unknown;
+  submittedAt: Date;
+  createdAt: Date;
+}): RfqRecord {
+  const picName = rfq.picName.trim() || rfq.customerName?.trim() || "Customer";
+  const companyName = rfq.companyName.trim() || rfq.customerName?.trim() || "Perusahaan";
+
+  return {
+    id: rfq.id,
+    number: rfq.number,
+    customerId: rfq.customerId,
+    status: rfq.status,
+    companyName,
+    picName,
+    email: rfq.email,
+    phone: rfq.phone,
+    address: rfq.address,
+    city: rfq.city,
+    province: rfq.province,
+    country: rfq.country,
+    purchaseEstimate: rfq.purchaseEstimate,
+    budget: rfq.budget,
+    generalNote: rfq.generalNote,
+    pdfUrl: rfq.pdfUrl,
+    items: rfq.items as RfqItemInput[],
+    submittedAt: rfq.submittedAt,
+    createdAt: rfq.createdAt,
+  };
+}
+
+export async function createRfq(input: CreateRfqPayload): Promise<RfqRecord> {
   if (!input.items.length) {
     throw new Error("Minimal satu produk diperlukan untuk RFQ.");
   }
 
-  const createdAt = new Date();
-  const number = await generateRfqNumber(createdAt);
-  const customerName = input.customerName?.trim() || profileUser.name;
-  const customerId = input.customerId?.trim() || profileUser.id;
+  const submittedAt = new Date();
+  const number = await generateRfqNumber(submittedAt);
 
   const pdfBytes = await buildRfqPdf({
     number,
-    customerName,
+    companyName: input.companyName,
+    picName: input.picName,
+    email: input.email,
+    phone: input.phone,
+    address: input.address,
+    city: input.city,
+    province: input.province,
+    country: input.country,
+    purchaseEstimate: input.purchaseEstimate,
+    budget: input.budget ?? null,
+    generalNote: input.generalNote ?? null,
     items: input.items,
-    createdAt,
+    createdAt: submittedAt,
   });
 
   const downloadsDir = path.join(
@@ -134,44 +210,49 @@ export async function createRfq(input: CreateRfqInput): Promise<RfqRecord> {
   const rfq = await prisma.rfq.create({
     data: {
       number,
-      customerName,
-      customerId,
+      customerId: input.customerId?.trim() || null,
+      status: "SUBMITTED",
+      companyName: input.companyName.trim(),
+      picName: input.picName.trim(),
+      email: input.email.trim(),
+      phone: input.phone.trim(),
+      address: input.address.trim(),
+      city: input.city.trim(),
+      province: input.province.trim(),
+      country: input.country.trim(),
+      purchaseEstimate: input.purchaseEstimate,
+      budget: input.budget?.trim() || null,
+      generalNote: input.generalNote?.trim() || null,
+      attachments: input.attachments ?? [],
       pdfUrl,
       items: input.items,
+      submittedAt,
+      rfqItems: {
+        create: input.items.map((item, index) => ({
+          productId: item.productId || null,
+          productName: item.name,
+          productSlug: item.slug,
+          quantity: item.quantity,
+          note: item.note?.trim() || null,
+          sortOrder: index,
+        })),
+      },
     },
+    include: { rfqItems: true },
   });
 
-  return {
-    id: rfq.id,
-    number: rfq.number,
-    customerName: rfq.customerName,
-    customerId: rfq.customerId,
-    status: rfq.status,
-    pdfUrl: rfq.pdfUrl,
-    items: rfq.items as RfqItemInput[],
-    createdAt: rfq.createdAt,
-  };
+  return mapRfqRecord(rfq);
 }
 
 export async function getRfqByNumber(number: string): Promise<RfqRecord | null> {
   const rfq = await prisma.rfq.findUnique({ where: { number } });
-
   if (!rfq) return null;
-
-  return {
-    id: rfq.id,
-    number: rfq.number,
-    customerName: rfq.customerName,
-    customerId: rfq.customerId,
-    status: rfq.status,
-    pdfUrl: rfq.pdfUrl,
-    items: rfq.items as RfqItemInput[],
-    createdAt: rfq.createdAt,
-  };
+  return mapRfqRecord(rfq);
 }
 
-export async function listRfqs() {
+export async function listRfqs(customerId?: string) {
   return prisma.rfq.findMany({
+    where: customerId ? { customerId } : undefined,
     orderBy: { createdAt: "desc" },
     take: 100,
   });

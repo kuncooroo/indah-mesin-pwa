@@ -90,6 +90,9 @@ export type AdminProduct = {
   statusLabel: string;
   priceLabel: string;
   priceNote: string | null;
+  minOrder: number;
+  rating: number;
+  soldCount: number;
   isFeatured: boolean;
   isActive: boolean;
   sortOrder: number;
@@ -101,4 +104,64 @@ export type DashboardStats = {
   categories: number;
   products: number;
   featuredProducts: number;
+  articles: number;
+  faqs: number;
+  reviews: number;
+  rfqs: number;
+  favorites: number;
+  customers: number;
+};
+
+export type AdminArticle = {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  content: string;
+  category: "ARTIKEL" | "TIPS_MESIN" | "TEKNOLOGI" | "EVENT";
+  categoryLabel: string;
+  image: string;
+  featured: boolean;
+  isActive: boolean;
+  publishedAt: string;
+};
+
+export type AdminFaq = {
+  id: string;
+  category: "UMUM" | "AKUN" | "LAYANAN" | "PEMESANAN";
+  question: string;
+  answer: string;
+  sortOrder: number;
+  isActive: boolean;
+};
+
+export type AdminReview = {
+  id: string;
+  productId: string | null;
+  authorName: string;
+  company: string;
+  rating: number;
+  review: string;
+  image: string | null;
+  dateLabel: string | null;
+  isActive: boolean;
+  sortOrder: number;
+  product?: { id: string; slug: string; name: string } | null;
+};
+
+export type AdminCustomer = {
+  id: string;
+  email: string;
+  name: string;
+  phone: string | null;
+  isActive: boolean;
+  createdAt: string;
+  _count: { favorites: number; rfqs: number };
+};
+
+export type AdminFavorite = {
+  id: string;
+  createdAt: string;
+  customer: { id: string; name: string; email: string };
+  product: { id: string; slug: string; name: string };
 };

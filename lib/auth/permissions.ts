@@ -11,10 +11,18 @@ export function isAdmin(session: SessionPayload | null): boolean {
   );
 }
 
+export function isCustomer(session: SessionPayload | null): boolean {
+  return session?.role === "CUSTOMER";
+}
+
 export function canManageUsers(session: SessionPayload | null): boolean {
   return isSuperAdmin(session);
 }
 
 export function canManageCatalog(session: SessionPayload | null): boolean {
+  return isAdmin(session);
+}
+
+export function canAccessAdminPanel(session: SessionPayload | null): boolean {
   return isAdmin(session);
 }

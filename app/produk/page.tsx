@@ -1,4 +1,5 @@
 import { ProductCatalog } from "@/components/sections/product/product-catalog";
+import { catalogService } from "@/lib/services/catalog.service";
 
 type ProductPageProps = {
   searchParams: Promise<{ kategori?: string }>;
@@ -8,29 +9,14 @@ export default async function ProductListingPage({
   searchParams,
 }: ProductPageProps) {
   const params = await searchParams;
-  const initialFilter = mapLegacyCategory(params.kategori);
+  const initialFilter = params.kategori ?? "all";
+  const products = await catalogService.getCatalogProducts();
 
   return (
     <div className="page-rise">
       <main>
-        <ProductCatalog initialFilter={initialFilter} />
+        <ProductCatalog initialFilter={initialFilter} products={products} />
       </main>
     </div>
   );
-}
-
-function mapLegacyCategory(slug?: string): string {
-  if (!slug) return "all";
-
-  const mapping: Record<string, string> = {
-    sterilisasi: "sterilisator",
-    "food-processing": "sterilisator",
-    packaging: "retort-parts",
-    cnc: "lainnya",
-    pertanian: "lainnya",
-    logistik: "lainnya",
-    produksi: "pompa",
-  };
-
-  return mapping[slug] ?? "all";
 }

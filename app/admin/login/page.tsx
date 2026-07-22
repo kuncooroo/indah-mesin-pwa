@@ -13,9 +13,9 @@ export default function AdminLoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4">
       <Card className="w-full max-w-md">
-        <CardHeader>
+        <CardHeader className="text-center">
           <CardTitle className="text-primary">IndustrialX Admin</CardTitle>
-          <CardDescription>
+          <CardDescription className="text-center">
             Masuk untuk mengelola katalog produk dan kategori.
           </CardDescription>
         </CardHeader>

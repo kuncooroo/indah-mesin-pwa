@@ -4,14 +4,14 @@ import { HomeHeader } from "@/components/sections/home/home-header";
 import { LatestCollectionSection } from "@/components/sections/home/latest-collection-section";
 import { PromoHeroSection } from "@/components/sections/home/promo-hero-section";
 import { UsefulArticlesSection } from "@/components/sections/home/useful-articles-section";
-import {
-  getBestSellerProduct,
-  getLatestCollectionProducts,
-} from "@/lib/data/products";
+import { catalogService } from "@/lib/services/catalog.service";
 
-export default function HomePage() {
-  const bestSeller = getBestSellerProduct();
-  const latestProducts = getLatestCollectionProducts();
+export default async function HomePage() {
+  const [bestSeller, latestProducts, articles] = await Promise.all([
+    catalogService.getFeaturedProduct(),
+    catalogService.getLatestProducts(6),
+    catalogService.getArticles(),
+  ]);
 
   return (
     <div className="page-rise">
@@ -21,7 +21,7 @@ export default function HomePage() {
         <CategoriesSection />
         {bestSeller ? <BestSellerSection product={bestSeller} /> : null}
         <LatestCollectionSection products={latestProducts} />
-        <UsefulArticlesSection />
+        <UsefulArticlesSection articles={articles} />
       </main>
     </div>
   );

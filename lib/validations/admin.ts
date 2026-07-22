@@ -27,7 +27,13 @@ export const productSchema = z.object({
   sku: z.string().min(2),
   name: z.string().min(2),
   description: z.string().min(10),
-  image: z.url("URL gambar tidak valid"),
+  image: z
+    .string()
+    .min(1, "Gambar wajib diunggah")
+    .refine(
+      (value) => value.startsWith("/assets/") || value.startsWith("http"),
+      "Path gambar tidak valid",
+    ),
   categoryId: z.string().min(1),
   status: z.enum(StockStatus),
   statusLabel: z.string().min(2),
@@ -48,6 +54,9 @@ export const productSchema = z.object({
     )
     .optional(),
   benefit: z.unknown().optional(),
+  minOrder: z.coerce.number().int().min(1).default(1),
+  rating: z.coerce.number().min(0).max(5).default(0),
+  soldCount: z.coerce.number().int().min(0).default(0),
   isFeatured: z.boolean().default(false),
   isActive: z.boolean().default(true),
   sortOrder: z.coerce.number().int().default(0),

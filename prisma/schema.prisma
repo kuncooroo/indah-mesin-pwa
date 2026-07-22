@@ -7,14 +7,11 @@ datasource db {
   provider = "mysql"
 }
 
+// ─── Admin panel (SUPERADMIN & ADMIN) ───────────────────────────────────────
+
 enum UserRole {
   SUPERADMIN
   ADMIN
-}
-
-enum StockStatus {
-  READY
-  INDENT
 }
 
 model User {
@@ -28,6 +25,59 @@ model User {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("users")
+}
+
+// ─── PWA customer (USER) ────────────────────────────────────────────────────
+
+model Customer {
+  id         String         @id @default(cuid())
+  email      String         @unique
+  name       String
+  password   String
+  phone      String?
+  googleId   String?        @unique @map("google_id")
+  avatarUrl  String?        @map("avatar_url") @db.Text
+  isActive   Boolean        @default(true) @map("is_active")
+  favorites  Favorite[]
+  rfqs       Rfq[]
+  notifications Notification[]
+  createdAt  DateTime       @default(now()) @map("created_at")
+  updatedAt  DateTime       @updatedAt @map("updated_at")
+
+  @@map("customers")
+}
+
+// ─── Notifikasi ─────────────────────────────────────────────────────────────
+
+enum NotificationType {
+  WELCOME
+  RFQ_SUBMITTED
+  RFQ_STATUS
+  PROMO
+  SYSTEM
+}
+
+model Notification {
+  id         String           @id @default(cuid())
+  customerId String?          @map("customer_id")
+  customer   Customer?        @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  email      String?
+  type       NotificationType @default(SYSTEM)
+  title      String
+  message    String           @db.Text
+  isRead     Boolean          @default(false) @map("is_read")
+  sentEmail  Boolean          @default(false) @map("sent_email")
+  createdAt  DateTime         @default(now()) @map("created_at")
+
+  @@index([customerId, isRead, createdAt])
+  @@map("notifications")
+}
+
+// ─── Katalog ────────────────────────────────────────────────────────────────
+
+enum StockStatus {
+  READY
+  INDENT
 }
 
 model Category {
@@ -46,52 +96,196 @@ model Category {
 }
 
 model Product {
-  id             String      @id @default(cuid())
-  slug           String      @unique
-  sku            String      @unique
+  id             String          @id @default(cuid())
+  slug           String          @unique
+  sku            String          @unique
   name           String
-  description    String      @db.Text
-  image          String      @db.Text
+  description    String          @db.Text
+  image          String          @db.Text
   gallery        Json?
-  categoryId     String      @map("category_id")
-  category       Category    @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  status         StockStatus @default(READY)
-  statusLabel    String      @map("status_label")
-  priceLabel     String      @map("price_label")
-  priceNote      String?     @map("price_note") @db.Text
+  categoryId     String          @map("category_id")
+  category       Category        @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  status         StockStatus     @default(READY)
+  statusLabel    String          @map("status_label")
+  priceLabel     String          @map("price_label")
+  priceNote      String?         @map("price_note") @db.Text
+  minOrder       Int             @default(1) @map("min_order")
+  rating         Float           @default(0)
+  soldCount      Int             @default(0) @map("sold_count")
   features       Json?
   specifications Json?
   downloads      Json?
   benefit        Json?
-  isFeatured     Boolean     @default(false) @map("is_featured")
-  isActive       Boolean     @default(true) @map("is_active")
-  sortOrder      Int         @default(0) @map("sort_order")
-  createdAt      DateTime    @default(now()) @map("created_at")
-  updatedAt      DateTime    @updatedAt @map("updated_at")
+  isFeatured     Boolean         @default(false) @map("is_featured")
+  isActive       Boolean         @default(true) @map("is_active")
+  sortOrder      Int             @default(0) @map("sort_order")
+  favorites      Favorite[]
+  reviews        ProductReview[]
+  rfqItems       RfqItem[]
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @updatedAt @map("updated_at")
 
   @@index([categoryId])
   @@index([isActive, isFeatured])
   @@map("products")
 }
 
+// ─── Artikel / Berita ───────────────────────────────────────────────────────
+
+enum ArticleCategory {
+  ARTIKEL
+  TIPS_MESIN
+  TEKNOLOGI
+  EVENT
+}
+
+model Article {
+  id            String          @id @default(cuid())
+  slug          String          @unique
+  title         String
+  excerpt       String          @db.Text
+  content       String          @db.Text
+  category      ArticleCategory
+  categoryLabel String          @map("category_label")
+  image         String          @db.Text
+  featured      Boolean         @default(false)
+  isActive      Boolean         @default(true) @map("is_active")
+  publishedAt   DateTime        @map("published_at")
+  createdAt     DateTime        @default(now()) @map("created_at")
+  updatedAt     DateTime        @updatedAt @map("updated_at")
+
+  @@index([isActive, publishedAt])
+  @@map("articles")
+}
+
+// ─── Ulasan produk ──────────────────────────────────────────────────────────
+
+model ProductReview {
+  id         String   @id @default(cuid())
+  productId  String?  @map("product_id")
+  product    Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  authorName String   @map("author_name")
+  company    String
+  rating     Int      @default(5)
+  review     String   @db.Text
+  image      String?  @db.Text
+  dateLabel  String?  @map("date_label")
+  isActive   Boolean  @default(true) @map("is_active")
+  sortOrder  Int      @default(0) @map("sort_order")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@index([productId, isActive])
+  @@map("product_reviews")
+}
+
+// ─── Favorit (customer ↔ product) ───────────────────────────────────────────
+
+model Favorite {
+  id         String   @id @default(cuid())
+  customerId String   @map("customer_id")
+  productId  String   @map("product_id")
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@unique([customerId, productId])
+  @@index([customerId])
+  @@map("favorites")
+}
+
+// ─── FAQ ────────────────────────────────────────────────────────────────────
+
+enum FaqCategory {
+  UMUM
+  AKUN
+  LAYANAN
+  PEMESANAN
+}
+
+model Faq {
+  id        String      @id @default(cuid())
+  category  FaqCategory
+  question  String      @db.Text
+  answer    String      @db.Text
+  sortOrder Int         @default(0) @map("sort_order")
+  isActive  Boolean     @default(true) @map("is_active")
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+
+  @@index([category, isActive])
+  @@map("faqs")
+}
+
+// ─── RFQ ────────────────────────────────────────────────────────────────────
+
 enum RfqStatus {
   PENDING
   REVIEWED
   QUOTED
   CLOSED
+  SUBMITTED
+  UNDER_REVIEW
+  QUOTATION_SENT
+  NEGOTIATION
+  ACCEPTED
+  REJECTED
+  PURCHASE_ORDER
+  PRODUCTION
+  SHIPPING
+  COMPLETED
+}
+
+enum PurchaseEstimate {
+  THIS_WEEK
+  THIS_MONTH
+  THREE_MONTHS
+  UNKNOWN
 }
 
 model Rfq {
-  id           String    @id @default(cuid())
-  number       String    @unique
-  customerName String    @map("customer_name")
-  customerId   String?   @map("customer_id")
-  status       RfqStatus @default(PENDING)
-  pdfUrl       String    @map("pdf_url") @db.Text
-  items        Json
-  createdAt    DateTime  @default(now()) @map("created_at")
-  updatedAt    DateTime  @updatedAt @map("updated_at")
+  id               String            @id @default(cuid())
+  number           String            @unique
+  customerId       String?           @map("customer_id")
+  customer         Customer?         @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  customerName     String?           @map("customer_name")
+  status           RfqStatus         @default(SUBMITTED)
+  companyName      String            @default("") @map("company_name")
+  picName          String            @default("") @map("pic_name")
+  email            String            @default("")
+  phone            String            @default("")
+  address          String            @default("") @db.VarChar(500)
+  city             String            @default("")
+  province         String            @default("")
+  country          String            @default("Indonesia")
+  purchaseEstimate PurchaseEstimate? @map("purchase_estimate")
+  budget           String?
+  generalNote      String?           @map("general_note") @db.Text
+  attachments      Json?
+  pdfUrl           String            @map("pdf_url") @db.Text
+  items            Json
+  rfqItems         RfqItem[]
+  submittedAt      DateTime          @default(now()) @map("submitted_at")
+  createdAt        DateTime          @default(now()) @map("created_at")
+  updatedAt        DateTime          @updatedAt @map("updated_at")
 
   @@index([status, createdAt])
+  @@index([customerId, createdAt])
   @@map("rfqs")
+}
+
+model RfqItem {
+  id          String   @id @default(cuid())
+  rfqId       String   @map("rfq_id")
+  rfq         Rfq      @relation(fields: [rfqId], references: [id], onDelete: Cascade)
+  productId   String?  @map("product_id")
+  product     Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  productName String   @map("product_name")
+  productSlug String   @map("product_slug")
+  quantity    Int      @default(1)
+  note        String?  @db.Text
+  sortOrder   Int      @default(0) @map("sort_order")
+
+  @@index([rfqId])
+  @@map("rfq_items")
 }

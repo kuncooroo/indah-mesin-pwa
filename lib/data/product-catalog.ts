@@ -170,10 +170,11 @@ export function parseCatalogPrice(priceLabel: string): number {
 }
 
 export function filterCatalogProducts(
+  products: CatalogProduct[],
   filters: CatalogFilterState,
   query = "",
 ): CatalogProduct[] {
-  let list = [...catalogProducts];
+  let list = [...products];
 
   if (filters.category !== "all") {
     list = list.filter((product) => product.filterId === filters.category);
@@ -224,6 +225,7 @@ export function filterCatalogProducts(
 
 export function getCatalogProducts(filterId = "all", query = "") {
   return filterCatalogProducts(
+    catalogProducts,
     {
       category: filterId,
       minPrice: 0,

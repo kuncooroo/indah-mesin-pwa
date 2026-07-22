@@ -15,13 +15,14 @@ import {
   priceSliderMax,
   type CatalogFilterState,
 } from "@/lib/data/catalog-filters";
-import { filterCatalogProducts } from "@/lib/data/product-catalog";
+import { filterCatalogProducts, type CatalogProduct } from "@/lib/data/product-catalog";
 import { cn } from "@/lib/utils";
 
 type ProductFilterPanelProps = {
   open: boolean;
   appliedFilters: CatalogFilterState;
   searchQuery: string;
+  products: CatalogProduct[];
   onClose: () => void;
   onApply: (filters: CatalogFilterState) => void;
 };
@@ -117,6 +118,7 @@ export function ProductFilterPanel({
   open,
   appliedFilters,
   searchQuery,
+  products,
   onClose,
   onApply,
 }: ProductFilterPanelProps) {
@@ -140,8 +142,8 @@ export function ProductFilterPanel({
   }, [open]);
 
   const previewCount = useMemo(
-    () => filterCatalogProducts(draft, searchQuery).length,
-    [draft, searchQuery],
+    () => filterCatalogProducts(products, draft, searchQuery).length,
+    [products, draft, searchQuery],
   );
 
   if (!open) return null;

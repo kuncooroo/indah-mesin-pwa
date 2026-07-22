@@ -8,7 +8,7 @@ export type ProductTestimonial = {
   dateLabel: string;
 };
 
-const defaultTestimonials: ProductTestimonial[] = [
+export const defaultTestimonials: ProductTestimonial[] = [
   {
     id: "testi-1",
     name: "Budi Santoso",

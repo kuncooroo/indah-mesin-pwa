@@ -21,7 +21,7 @@ export function BestSellerSection({ product }: BestSellerSectionProps) {
   return (
     <section className="px-4 py-2">
       <h3 className="mb-3 text-[17px] font-bold text-primary">Pilihan Terlaris</h3>
-      <article className="overflow-hidden rounded-3xl bg-[#eef4ff]">
+      <article className="overflow-hidden rounded-3xl bg-surface-container">
         <div className="flex min-h-[210px]">
           <div className="flex flex-1 flex-col justify-between p-4">
             <div>

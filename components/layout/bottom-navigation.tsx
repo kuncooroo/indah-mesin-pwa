@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Heart, Home, LayoutGrid, Newspaper, User } from "lucide-react";
+import { Home, LayoutGrid, Newspaper, ShoppingCart, User } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -12,7 +12,7 @@ const leftNavigationItems = [
 ];
 
 const rightNavigationItems = [
-  { label: "Favorit", href: "/simpanan", icon: Heart },
+  { label: "RFQ", href: "/simpanan", icon: ShoppingCart },
   { label: "Akun", href: "/akun", icon: User },
 ];
 

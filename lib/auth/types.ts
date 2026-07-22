@@ -1,4 +1,4 @@
-export type SessionRole = "SUPERADMIN" | "ADMIN";
+export type SessionRole = "SUPERADMIN" | "ADMIN" | "CUSTOMER";
 
 export type SessionPayload = {
   sub: string;

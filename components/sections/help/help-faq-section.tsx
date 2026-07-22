@@ -3,42 +3,46 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
-  Camera,
+  Bot,
   ChevronDown,
   CircleHelp,
   Mail,
   Phone,
   Search,
   SlidersHorizontal,
-  User,
   X,
 } from "lucide-react";
 
 import { BackLink } from "@/components/shared/back-link";
 import { WhatsAppButton } from "@/components/shared/whatsapp-button";
+import { AiAssistantPanel } from "@/components/sections/help/ai-assistant-panel";
 import {
   faqCategories,
-  faqItems,
   type FaqCategory,
+  type FaqItem,
 } from "@/lib/data/faq";
 import { whatsappContactHref } from "@/lib/data/contact";
 import { cn } from "@/lib/utils";
 
-type HelpTab = "faq" | "contact";
+type HelpTab = "assistant" | "faq" | "contact";
 
-export function HelpFaqSection() {
-  const [activeTab, setActiveTab] = useState<HelpTab>("faq");
+type HelpFaqSectionProps = {
+  faqs: FaqItem[];
+};
+
+export function HelpFaqSection({ faqs }: HelpFaqSectionProps) {
+  const [activeTab, setActiveTab] = useState<HelpTab>("assistant");
   const [activeCategory, setActiveCategory] = useState<FaqCategory>("umum");
   const [searchQuery, setSearchQuery] = useState("");
-  const [openFaqId, setOpenFaqId] = useState<string>("faq-order");
+  const [openFaqId, setOpenFaqId] = useState<string>(faqs[0]?.id ?? "");
   const [showCategoryFilter, setShowCategoryFilter] = useState(false);
 
   const filteredFaqs = useMemo(() => {
-    let list = faqItems.filter((item) => item.category === activeCategory);
+    let list = faqs.filter((item) => item.category === activeCategory);
 
     if (searchQuery.trim()) {
       const term = searchQuery.trim().toLowerCase();
-      list = faqItems.filter(
+      list = faqs.filter(
         (item) =>
           item.question.toLowerCase().includes(term) ||
           item.answer.toLowerCase().includes(term),
@@ -46,7 +50,7 @@ export function HelpFaqSection() {
     }
 
     return list;
-  }, [activeCategory, searchQuery]);
+  }, [faqs, activeCategory, searchQuery]);
 
   const activeCategoryLabel =
     faqCategories.find((category) => category.id === activeCategory)?.label ??
@@ -93,12 +97,25 @@ export function HelpFaqSection() {
           Ada yang bisa kami bantu?
         </p>
 
-        <div className="mb-5 grid grid-cols-2 gap-2">
+        <div className="mb-5 grid grid-cols-3 gap-2">
+          <button
+            type="button"
+            onClick={() => setActiveTab("assistant")}
+            className={cn(
+              "flex h-11 items-center justify-center gap-1.5 rounded-2xl text-[12px] font-semibold transition-colors",
+              activeTab === "assistant"
+                ? "bg-primary text-white"
+                : "border-2 border-primary bg-white text-primary",
+            )}
+          >
+            <Bot className="size-4" strokeWidth={2.2} />
+            Asisten AI
+          </button>
           <button
             type="button"
             onClick={() => setActiveTab("faq")}
             className={cn(
-              "h-11 rounded-2xl text-[13px] font-semibold transition-colors",
+              "h-11 rounded-2xl text-[12px] font-semibold transition-colors",
               activeTab === "faq"
                 ? "bg-primary text-white"
                 : "border-2 border-primary bg-white text-primary",
@@ -110,17 +127,19 @@ export function HelpFaqSection() {
             type="button"
             onClick={() => setActiveTab("contact")}
             className={cn(
-              "h-11 rounded-2xl text-[13px] font-semibold transition-colors",
+              "h-11 rounded-2xl text-[12px] font-semibold transition-colors",
               activeTab === "contact"
                 ? "bg-primary text-white"
                 : "border-2 border-primary bg-white text-primary",
             )}
           >
-            Hubungi Kami
+            Hubungi
           </button>
         </div>
 
-        {activeTab === "faq" ? (
+        {activeTab === "assistant" ? (
+          <AiAssistantPanel />
+        ) : activeTab === "faq" ? (
           <>
             <div className="mb-4 flex gap-2">
               <div className="relative flex-1">

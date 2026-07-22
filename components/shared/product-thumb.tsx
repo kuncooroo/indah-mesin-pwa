@@ -10,7 +10,7 @@ export function ProductThumb({ className, iconClassName }: ProductThumbProps) {
   return (
     <div
       className={cn(
-        "flex items-center justify-center bg-[#eef4ff]",
+        "flex items-center justify-center bg-surface-container",
         className,
       )}
     >

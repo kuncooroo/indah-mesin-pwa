@@ -3,10 +3,11 @@ import { notFound } from "next/navigation";
 import { Calendar } from "lucide-react";
 
 import { BackLink } from "@/components/shared/back-link";
-import { getArticleBySlug, articles } from "@/lib/data/articles";
+import { catalogService } from "@/lib/services/catalog.service";
 
-export function generateStaticParams() {
-  return articles.map((article) => ({ slug: article.slug }));
+export async function generateStaticParams() {
+  const slugs = await catalogService.getArticleSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
 type ArticleDetailPageProps = {
@@ -17,7 +18,7 @@ export default async function ArticleDetailPage({
   params,
 }: ArticleDetailPageProps) {
   const { slug } = await params;
-  const article = getArticleBySlug(slug);
+  const article = await catalogService.getArticleBySlug(slug);
 
   if (!article) {
     notFound();
@@ -34,7 +35,7 @@ export default async function ArticleDetailPage({
       </header>
 
       <main className="px-4 pt-4">
-        <div className="relative mb-4 aspect-[16/10] overflow-hidden rounded-2xl bg-[#eef4ff]">
+        <div className="relative mb-4 aspect-[16/10] overflow-hidden rounded-2xl bg-surface-container">
           <Image
             src={article.image}
             alt={article.title}

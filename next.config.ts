@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  devIndicators: false,
   images: {
     remotePatterns: [
       {
@@ -39,7 +40,6 @@ const nextConfig: NextConfig = {
         permanent: false,
       },
       { source: "/katalog", destination: "/produk", permanent: true },
-      { source: "/favorit", destination: "/simpanan", permanent: true },
       { source: "/kontak", destination: "/akun", permanent: true },
     ];
   },

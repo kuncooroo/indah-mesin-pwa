@@ -1,4 +1,15 @@
-import { FolderTree, Package, Sparkles, Users } from "lucide-react";
+import Link from "next/link";
+import {
+  FileText,
+  FolderTree,
+  Heart,
+  HelpCircle,
+  MessageSquare,
+  Newspaper,
+  Package,
+  UserCircle,
+  Users,
+} from "lucide-react";
 
 import {
   Card,
@@ -10,20 +21,39 @@ import { dashboardService } from "@/lib/services/auth.service";
 import { getSessionFromCookie } from "@/lib/auth/session";
 import { isSuperAdmin } from "@/lib/auth/permissions";
 
+type DashboardRow = {
+  no: number;
+  label: string;
+  value: number;
+  href: string;
+  icon: typeof Package;
+};
+
 export default async function AdminDashboardPage() {
   const [stats, session] = await Promise.all([
     dashboardService.getStats(),
     getSessionFromCookie(),
   ]);
 
-  const cards = [
-    { label: "Total Produk", value: stats.products, icon: Package },
-    { label: "Produk Unggulan", value: stats.featuredProducts, icon: Sparkles },
-    { label: "Kategori", value: stats.categories, icon: FolderTree },
+  const rows: DashboardRow[] = [
+    { no: 1, label: "Produk", value: stats.products, href: "/admin/products", icon: Package },
+    { no: 2, label: "Kategori", value: stats.categories, href: "/admin/categories", icon: FolderTree },
+    { no: 3, label: "Artikel", value: stats.articles, href: "/admin/articles", icon: Newspaper },
+    { no: 4, label: "Ulasan", value: stats.reviews, href: "/admin/reviews", icon: MessageSquare },
+    { no: 5, label: "FAQ", value: stats.faqs, href: "/admin/faqs", icon: HelpCircle },
+    { no: 6, label: "RFQ", value: stats.rfqs, href: "/admin/rfqs", icon: FileText },
+    { no: 7, label: "Favorit", value: stats.favorites, href: "/admin/favorites", icon: Heart },
+    { no: 8, label: "Pelanggan", value: stats.customers, href: "/admin/customers", icon: UserCircle },
   ];
 
   if (isSuperAdmin(session)) {
-    cards.push({ label: "Pengguna Admin", value: stats.users, icon: Users });
+    rows.push({
+      no: 9,
+      label: "Admin",
+      value: stats.users,
+      href: "/admin/users",
+      icon: Users,
+    });
   }
 
   return (
@@ -31,25 +61,51 @@ export default async function AdminDashboardPage() {
       <div>
         <h1 className="font-heading text-2xl font-semibold">Dashboard</h1>
         <p className="text-sm text-muted-foreground">
-          Ringkasan katalog IndustrialX Marketplace.
+          Ringkasan modul IndustrialX Marketplace.
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {cards.map((card) => (
-          <Card key={card.label}>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
-                {card.label}
-              </CardTitle>
-              <card.icon className="size-4 text-primary" />
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-semibold">{card.value}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Ringkasan Modul</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b text-left text-muted-foreground">
+                  <th className="pb-3 pr-4 font-medium w-12">No</th>
+                  <th className="pb-3 pr-4 font-medium">Modul</th>
+                  <th className="pb-3 pr-4 font-medium">Total Data</th>
+                  <th className="pb-3 font-medium">Kelola</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((row) => (
+                  <tr key={row.href} className="border-b last:border-0">
+                    <td className="py-3 pr-4 text-muted-foreground">{row.no}</td>
+                    <td className="py-3 pr-4">
+                      <div className="flex items-center gap-2 font-medium">
+                        <row.icon className="size-4 text-primary" />
+                        {row.label}
+                      </div>
+                    </td>
+                    <td className="py-3 pr-4">{row.value}</td>
+                    <td className="py-3">
+                      <Link
+                        href={row.href}
+                        className="font-medium text-primary hover:underline"
+                      >
+                        Buka halaman
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

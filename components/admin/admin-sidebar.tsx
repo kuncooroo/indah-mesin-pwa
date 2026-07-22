@@ -3,10 +3,15 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   FileText,
   FolderTree,
+  Heart,
+  HelpCircle,
   LayoutDashboard,
   LogOut,
+  MessageSquare,
+  Newspaper,
   Package,
   Users,
+  UserCircle,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -21,8 +26,13 @@ const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/admin/products", label: "Produk", icon: Package },
   { href: "/admin/categories", label: "Kategori", icon: FolderTree },
+  { href: "/admin/articles", label: "Artikel", icon: Newspaper },
+  { href: "/admin/reviews", label: "Ulasan", icon: MessageSquare },
+  { href: "/admin/faqs", label: "FAQ", icon: HelpCircle },
   { href: "/admin/rfqs", label: "RFQ", icon: FileText },
-  { href: "/admin/users", label: "Pengguna", icon: Users, superadminOnly: true },
+  { href: "/admin/favorites", label: "Favorit", icon: Heart },
+  { href: "/admin/customers", label: "Pelanggan", icon: UserCircle },
+  { href: "/admin/users", label: "Admin", icon: Users, superadminOnly: true },
 ];
 
 export function AdminSidebar({ session }: AdminSidebarProps) {
@@ -63,7 +73,7 @@ export function AdminSidebar({ session }: AdminSidebarProps) {
               className={cn(
                 "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                 active
-                  ? "bg-primary text-primary-foreground"
+                  ? "bg-primary text-white"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground",
               )}
             >
@@ -78,9 +88,6 @@ export function AdminSidebar({ session }: AdminSidebarProps) {
         <div className="mb-3 px-1">
           <p className="text-sm font-medium">{session.name}</p>
           <p className="text-xs text-muted-foreground">{session.email}</p>
-          <p className="mt-1 inline-flex rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold tracking-wide uppercase">
-            {session.role}
-          </p>
         </div>
         <Button
           variant="outline"

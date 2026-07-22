@@ -45,7 +45,7 @@ export async function verifySessionToken(
       sub,
       email: String(payload.email ?? ""),
       name: String(payload.name ?? ""),
-      role: payload.role as UserRole,
+      role: payload.role as SessionPayload["role"],
     };
   } catch {
     return null;

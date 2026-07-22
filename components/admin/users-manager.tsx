@@ -1,19 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Pencil, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import {
+  AdminListToolbar,
+  getRowNumber,
+  useAdminListState,
+} from "@/lib/admin/list-utils";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { AdminDialogContent } from "@/components/admin/admin-dialog-content";
 import {
   Dialog,
-  DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -44,6 +49,22 @@ export function UsersManager() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<UserForm>(emptyForm);
   const [saving, setSaving] = useState(false);
+
+  const getSearchText = useCallback(
+    (user: AdminUser) => [user.name, user.email, user.role].join(" "),
+    [],
+  );
+
+  const {
+    search,
+    setSearch,
+    page,
+    setPage,
+    totalPages,
+    paginated,
+    filtered,
+    pageSize,
+  } = useAdminListState(users, getSearchText);
 
   async function loadUsers() {
     setLoading(true);
@@ -145,10 +166,22 @@ export function UsersManager() {
           {loading ? (
             <p className="text-sm text-muted-foreground">Memuat...</p>
           ) : (
+            <>
+              <AdminListToolbar
+                search={search}
+                onSearchChange={setSearch}
+                placeholder="Cari pengguna..."
+                page={page}
+                totalPages={totalPages}
+                totalItems={filtered.length}
+                pageSize={pageSize}
+                onPageChange={setPage}
+              />
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b text-left text-muted-foreground">
+                    <th className="pb-3 pr-4 font-medium w-10">No</th>
                     <th className="pb-3 pr-4 font-medium">Nama</th>
                     <th className="pb-3 pr-4 font-medium">Email</th>
                     <th className="pb-3 pr-4 font-medium">Role</th>
@@ -157,8 +190,11 @@ export function UsersManager() {
                   </tr>
                 </thead>
                 <tbody>
-                  {users.map((user) => (
+                  {paginated.map((user, index) => (
                     <tr key={user.id} className="border-b last:border-0">
+                      <td className="py-3 pr-4 text-muted-foreground">
+                        {getRowNumber(page, index, pageSize)}
+                      </td>
                       <td className="py-3 pr-4 font-medium">{user.name}</td>
                       <td className="py-3 pr-4">{user.email}</td>
                       <td className="py-3 pr-4">{user.role}</td>
@@ -188,12 +224,13 @@ export function UsersManager() {
                 </tbody>
               </table>
             </div>
+            </>
           )}
         </CardContent>
       </Card>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-lg">
+        <AdminDialogContent>
           <DialogHeader>
             <DialogTitle>
               {editingId ? "Edit Pengguna" : "Tambah Pengguna"}
@@ -221,7 +258,7 @@ export function UsersManager() {
               <div className="space-y-2">
                 <label className="text-sm font-medium">Role</label>
                 <select
-                  className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm"
+                  className="h-10 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm"
                   value={form.role}
                   onChange={(event) =>
                     setForm({
@@ -268,7 +305,7 @@ export function UsersManager() {
               </Button>
             </DialogFooter>
           </form>
-        </DialogContent>
+        </AdminDialogContent>
       </Dialog>
     </div>
   );

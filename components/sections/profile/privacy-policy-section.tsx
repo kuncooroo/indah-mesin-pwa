@@ -19,7 +19,7 @@ export function PrivacyPolicySection() {
       </header>
 
       <main className="px-4 pt-5">
-        <div className="mb-6 rounded-2xl border border-border-subtle bg-[#eef4ff] p-4">
+        <div className="mb-6 rounded-2xl border border-border-subtle bg-surface-container p-4">
           <div className="flex items-start gap-3">
             <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white text-primary">
               <ShieldCheck className="size-5" strokeWidth={2} />
